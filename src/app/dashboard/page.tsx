@@ -453,26 +453,6 @@ export default function PatientDashboard() {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <MotionButton
-              variant="outline"
-              size="sm"
-              whileHover={buttonVariants.hover}
-              whileTap={buttonVariants.tap}
-            >
-              <Bell className="w-4 h-4 mr-2" />
-              Notifications
-            </MotionButton>
-            <MotionButton
-              variant="outline"
-              size="sm"
-              whileHover={buttonVariants.hover}
-              whileTap={buttonVariants.tap}
-            >
-              <User className="w-4 h-4 mr-2" />
-              Profile
-            </MotionButton>
-          </div>
         </motion.div>
 
         <motion.div

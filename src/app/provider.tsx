@@ -1,5 +1,6 @@
 import React from "react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
+import { GFProvider } from "@/context/AuthContext";
 
 interface ProviderProps {
   children: React.ReactNode;
@@ -8,14 +9,16 @@ interface ProviderProps {
 const Provider = ({ children }: ProviderProps) => {
   return (
     <div>
-      <NextThemesProvider
-        attribute="class"
-        defaultTheme="dark"
-        enableSystem
-        disableTransitionOnChange
-      >
-        {children}
-      </NextThemesProvider>
+      <GFProvider>
+        <NextThemesProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+        </NextThemesProvider>
+      </GFProvider>
     </div>
   );
 };
