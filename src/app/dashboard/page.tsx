@@ -392,13 +392,13 @@ export default function PatientDashboard() {
           </div>
         </motion.div>
 
+        {/* Summary Cards */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="visible"
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6"
         >
-          {/* Summary Cards */}
           <motion.div
             key="next-appointment"
             variants={cardVariants}
@@ -552,6 +552,7 @@ export default function PatientDashboard() {
 
        <AppointmentsSection/>
 
+       {/* Lab Results Section */}
         <motion.div
           className="grid grid-cols-1 md:grid-cols-2 gap-8"
           variants={containerVariants}
@@ -559,7 +560,6 @@ export default function PatientDashboard() {
           animate="visible"
           id="message"
         >
-          {/* Lab Results Section */}
           <motion.div
             className="bg-white rounded-xl shadow-md overflow-hidden"
             variants={itemVariants}

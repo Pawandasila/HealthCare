@@ -172,7 +172,6 @@ export default function DashboardLayout({
               />
               <span className="font-medium">Home</span>
             </Link>
-
           </nav>
 
           <div className="px-4 mb-4 mt-4">
@@ -217,34 +216,16 @@ export default function DashboardLayout({
               <CollapsibleContent>
                 <div className="pl-10 pr-2 space-y-1 mt-1">
                   <Link
-                    href="/pregnancy/tracker"
+                    href="/dashboard/pregnancy"
                     className={`flex items-center px-4 py-2 rounded-md hover:bg-blue-50 hover:text-blue-600 group ${
-                      isActive("/pregnancy/tracker")
-                        ? "bg-blue-50 text-blue-600"
-                        : "text-gray-900"
-                    }`}
-                  >
-                    <Calendar
-                      className={`mr-3 ${
-                        isActive("/pregnancy/tracker")
-                          ? "text-blue-600"
-                          : "text-gray-500 group-hover:text-blue-600"
-                      }`}
-                      size={16}
-                    />
-                    <span className="font-medium text-sm">SOS</span>
-                  </Link>
-                  <Link
-                    href="/pregnancy/health"
-                    className={`flex items-center px-4 py-2 rounded-md hover:bg-blue-50 hover:text-blue-600 group ${
-                      isActive("/pregnancy/health")
+                      isActive("/dashboard/pregnancy")
                         ? "bg-blue-50 text-blue-600"
                         : "text-gray-900"
                     }`}
                   >
                     <Activity
                       className={`mr-3 ${
-                        isActive("/pregnancy/health")
+                        isActive("/dashboard/pregnancy")
                           ? "text-blue-600"
                           : "text-gray-500 group-hover:text-blue-600"
                       }`}
@@ -291,24 +272,6 @@ export default function DashboardLayout({
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <div className="pl-10 pr-2 space-y-1 mt-1">
-                  <Link
-                    href="/child/milestones"
-                    className={`flex items-center px-4 py-2 rounded-md hover:bg-blue-50 hover:text-blue-600 group ${
-                      isActive("/child/milestones")
-                        ? "bg-blue-50 text-blue-600"
-                        : "text-gray-900"
-                    }`}
-                  >
-                    <BarChart2
-                      className={`mr-3 ${
-                        isActive("/child/milestones")
-                          ? "text-blue-600"
-                          : "text-gray-500 group-hover:text-blue-600"
-                      }`}
-                      size={16}
-                    />
-                    <span className="font-medium text-sm">SOS</span>
-                  </Link>
                   <Link
                     href="/child/health"
                     className={`flex items-center px-4 py-2 rounded-md hover:bg-blue-50 hover:text-blue-600 group ${
@@ -378,7 +341,7 @@ export default function DashboardLayout({
           sidebarOpen ? "ml-64" : "ml-0"
         }`}
       >
-        <div >{children}</div>
+        <div>{children}</div>
       </main>
     </div>
   );
