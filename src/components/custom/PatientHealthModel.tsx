@@ -1,31 +1,38 @@
 import React, { useState, useEffect } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import { motion, AnimatePresence } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { AnimatePresence, motion } from "framer-motion";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "../ui/button";
-import { Card, CardContent } from "../ui/card";
-import { Badge } from "../ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
 
 interface PatientDetails {
-  firstName: string;
-  lastName: string;
-  dateOfBirth: string;
-  Blood_group: string;
+  dob: string;
+  address: string;
+  phone: string;
+  blood_group: string;
   height: string;
   weight: string;
   gender: string;
 }
 
+interface FormData {
+  dob: string;
+  address: string;
+  phone: string;
+  blood_group: string;
+  height: string;
+  weight: string;
+  gender: string;
+  disease: string;
+  allergies: string;
+  medications: string;
+}
+
+// For UI display purposes
 interface HealthCondition {
   diseases: string[];
   allergies: string[];
@@ -38,18 +45,17 @@ const MotionButton = motion(Button);
 const MotionCard = motion(Card);
 const MotionBadge = motion(Badge);
 
-const PatientHealthModal: React.FC = () => {
+const GetHealthInfoPage: React.FC = () => {
   // State
-  const [isOpen, setIsOpen] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<string>("patient-details");
   const [patientDetails, setPatientDetails] = useState<PatientDetails>({
-    firstName: "",
-    lastName: "",
-    dateOfBirth: "",
-    Blood_group: "",
+    dob: "",
+    blood_group: "",
     height: "",
     weight: "",
     gender: "",
+    address: "",
+    phone: "",
   });
 
   const [healthCondition, setHealthCondition] = useState<HealthCondition>({
@@ -58,6 +64,19 @@ const PatientHealthModal: React.FC = () => {
     currentInjuries: [],
     notes: "",
     medications: [],
+  });
+
+  const [formData, setFormData] = useState<FormData>({
+    disease: "",
+    allergies: "",
+    medications: "",
+    dob: "",
+    blood_group: "",
+    height: "",
+    weight: "",
+    gender: "",
+    address: "",
+    phone: "",
   });
 
   const [currentInput, setCurrentInput] = useState<{
@@ -72,10 +91,15 @@ const PatientHealthModal: React.FC = () => {
     medication: "",
   });
 
-  // Open modal on component mount
+  // Sync arrays to string fields in formData whenever healthCondition changes
   useEffect(() => {
-    setIsOpen(true);
-  }, []);
+    setFormData(prev => ({
+      ...prev,
+      disease: healthCondition.diseases.join(', '),
+      allergies: healthCondition.allergies.join(', '),
+      medications: healthCondition.medications.join(', ')
+    }));
+  }, [healthCondition]);
 
   // Handlers
   const handlePatientDetailsChange = (
@@ -105,11 +129,13 @@ const PatientHealthModal: React.FC = () => {
     const value = currentInput[inputField as keyof typeof currentInput];
 
     if (value.trim()) {
+      // Update the array for UI display
       setHealthCondition((prev) => ({
         ...prev,
         [field]: [...prev[field], value.trim()],
       }));
 
+      // Reset the input field
       setCurrentInput((prev) => ({ ...prev, [inputField]: "" }));
     }
   };
@@ -124,10 +150,37 @@ const PatientHealthModal: React.FC = () => {
     }));
   };
 
+  const handleNotesChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const { value } = e.target;
+    
+    // Update healthCondition
+    setHealthCondition(prev => ({
+      ...prev,
+      notes: value
+    }));
+  };
+
   const handleSubmit = () => {
+    // Create the final form data by combining patientDetails and formData
+    const finalData = {
+      ...patientDetails,
+      dob: formData.dob || patientDetails.dob,
+      blood_group: formData.blood_group || patientDetails.blood_group,
+      height: formData.height || patientDetails.height,
+      weight: formData.weight || patientDetails.weight,
+      gender: formData.gender || patientDetails.gender,
+      address: formData.address,
+      phone: formData.phone,
+      disease: formData.disease,  // String format
+      allergies: formData.allergies,  // String format
+      medications: formData.medications,  // String format
+      notes: healthCondition.notes
+    };
+    
     // Process form submission here
-    console.log({ patientDetails, healthCondition });
-    setIsOpen(false);
+    console.log("Final submission data:", finalData);
+    alert("Patient information submitted successfully!");
+    // Reset form or redirect as needed
   };
 
   // Animation variants
@@ -175,99 +228,75 @@ const PatientHealthModal: React.FC = () => {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="sm:max-w-lg max-h-[80vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-2xl">
-            Patient Health Information
-          </DialogTitle>
-          <DialogDescription>
+    <div className="container mx-auto py-8 px-4">
+      <div className="max-w-3xl mx-auto bg-card rounded-lg shadow-lg p-6">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold mb-2">Patient Health Information</h1>
+          <p className="text-muted-foreground">
             Please fill in the patient details and health conditions
-          </DialogDescription>
-        </DialogHeader>
+          </p>
+        </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 sticky top-0 z-10 bg-background">
+          <TabsList className="grid w-full grid-cols-2 sticky top-0 z-10 bg-background mb-6">
             <TabsTrigger value="patient-details">Patient Details</TabsTrigger>
             <TabsTrigger value="health-condition">Health Condition</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="patient-details" className="space-y-4 mt-4">
+          <TabsContent value="patient-details" className="space-y-6">
             <motion.div
-              className="space-y-4"
+              className="space-y-6"
               variants={containerVariants}
               initial="hidden"
               animate="visible"
             >
-              <motion.div
-                className="grid grid-cols-2 gap-4"
-                variants={itemVariants}
-              >
-                <div className="space-y-2">
-                  <Label htmlFor="firstName">First Name</Label>
-                  <Input
-                    id="firstName"
-                    name="firstName"
-                    value={patientDetails.firstName}
-                    onChange={handlePatientDetailsChange}
-                    placeholder="John"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="lastName">Last Name</Label>
-                  <Input
-                    id="lastName"
-                    name="lastName"
-                    value={patientDetails.lastName}
-                    onChange={handlePatientDetailsChange}
-                    placeholder="Doe"
-                  />
-                </div>
-              </motion.div>
-
               <motion.div className="space-y-2" variants={itemVariants}>
                 <Label htmlFor="dateOfBirth">Date of Birth</Label>
                 <Input
                   id="dateOfBirth"
-                  name="dateOfBirth"
+                  name="dob"
                   type="date"
-                  value={patientDetails.dateOfBirth}
+                  value={patientDetails.dob}
                   onChange={handlePatientDetailsChange}
                 />
               </motion.div>
 
               <motion.div className="space-y-2" variants={itemVariants}>
-                <Label htmlFor="Blood_group">Blood Group</Label>
+                <Label htmlFor="blood_group">Blood Group</Label>
                 <Input
-                  id="Blood_group"
-                  name="Blood_group"
+                  id="blood_group"
+                  name="blood_group"
                   type="text"
-                  value={patientDetails.Blood_group}
+                  value={patientDetails.blood_group}
                   onChange={handlePatientDetailsChange}
                   placeholder="A+"
                 />
               </motion.div>
 
-              <motion.div className="space-y-2" variants={itemVariants}>
-                <Label htmlFor="height">Height</Label>
-                <Input
-                  id="height"
-                  name="height"
-                  value={patientDetails.height}
-                  onChange={handlePatientDetailsChange}
-                  placeholder="180 cm"
-                />
-              </motion.div>
-
-              <motion.div className="space-y-2" variants={itemVariants}>
-                <Label htmlFor="weight">Weight</Label>
-                <Input
-                  id="weight"
-                  name="weight"
-                  value={patientDetails.weight}
-                  onChange={handlePatientDetailsChange}
-                  placeholder="75 kg"
-                />
+              <motion.div 
+                className="grid grid-cols-1 md:grid-cols-2 gap-6"
+                variants={itemVariants}
+              >
+                <div className="space-y-2">
+                  <Label htmlFor="height">Height</Label>
+                  <Input
+                    id="height"
+                    name="height"
+                    value={patientDetails.height}
+                    onChange={handlePatientDetailsChange}
+                    placeholder="180 cm"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="weight">Weight</Label>
+                  <Input
+                    id="weight"
+                    name="weight"
+                    value={patientDetails.weight}
+                    onChange={handlePatientDetailsChange}
+                    placeholder="75 kg"
+                  />
+                </div>
               </motion.div>
 
               <motion.div className="space-y-2" variants={itemVariants}>
@@ -281,11 +310,34 @@ const PatientHealthModal: React.FC = () => {
                 />
               </motion.div>
 
+              <motion.div className="space-y-2" variants={itemVariants}>
+                <Label htmlFor="phone">Phone Number</Label>
+                <Input
+                  id="phone"
+                  name="phone"
+                  value={patientDetails.phone}
+                  onChange={handlePatientDetailsChange}
+                  placeholder="+1 123-456-7890"
+                />
+              </motion.div>
+
+              <motion.div className="space-y-2" variants={itemVariants}>
+                <Label htmlFor="address">Address</Label>
+                <Input
+                  id="address"
+                  name="address"
+                  value={patientDetails.address}
+                  onChange={handlePatientDetailsChange}
+                  placeholder="123 Main St, City, Country"
+                />
+              </motion.div>
+
               <motion.div className="flex justify-end" variants={itemVariants}>
                 <MotionButton
                   onClick={() => setActiveTab("health-condition")}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
+                  size="lg"
                 >
                   Next
                 </MotionButton>
@@ -293,9 +345,9 @@ const PatientHealthModal: React.FC = () => {
             </motion.div>
           </TabsContent>
 
-          <TabsContent value="health-condition" className="space-y-4 mt-4">
+          <TabsContent value="health-condition" className="space-y-6">
             <motion.div
-              className="space-y-4"
+              className="space-y-6"
               variants={containerVariants}
               initial="hidden"
               animate="visible"
@@ -307,8 +359,8 @@ const PatientHealthModal: React.FC = () => {
                   transition={{ type: "spring", stiffness: 300, damping: 24 }}
                 >
                   <CardContent className="pt-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="disease">Diseases</Label>
+                    <div className="space-y-3">
+                      <Label htmlFor="disease" className="text-lg font-medium">Diseases</Label>
                       <div className="flex space-x-2">
                         <Input
                           id="disease"
@@ -330,7 +382,7 @@ const PatientHealthModal: React.FC = () => {
                           Add
                         </MotionButton>
                       </div>
-                      <div className="flex flex-wrap gap-2 mt-2">
+                      <div className="flex flex-wrap gap-2 mt-3">
                         <AnimatePresence>
                           {healthCondition.diseases.map((disease, index) => (
                             <MotionBadge
@@ -373,8 +425,8 @@ const PatientHealthModal: React.FC = () => {
                   }}
                 >
                   <CardContent className="pt-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="allergy">Allergies</Label>
+                    <div className="space-y-3">
+                      <Label htmlFor="allergy" className="text-lg font-medium">Allergies</Label>
                       <div className="flex space-x-2">
                         <Input
                           id="allergy"
@@ -396,7 +448,7 @@ const PatientHealthModal: React.FC = () => {
                           Add
                         </MotionButton>
                       </div>
-                      <div className="flex flex-wrap gap-2 mt-2">
+                      <div className="flex flex-wrap gap-2 mt-3">
                         <AnimatePresence>
                           {healthCondition.allergies.map((allergy, index) => (
                             <MotionBadge
@@ -439,8 +491,8 @@ const PatientHealthModal: React.FC = () => {
                   }}
                 >
                   <CardContent className="pt-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="injury">Current Injuries</Label>
+                    <div className="space-y-3">
+                      <Label htmlFor="injury" className="text-lg font-medium">Current Injuries</Label>
                       <div className="flex space-x-2">
                         <Input
                           id="injury"
@@ -463,7 +515,7 @@ const PatientHealthModal: React.FC = () => {
                           Add
                         </MotionButton>
                       </div>
-                      <div className="flex flex-wrap gap-2 mt-2">
+                      <div className="flex flex-wrap gap-2 mt-3">
                         <AnimatePresence>
                           {healthCondition.currentInjuries.map(
                             (injury, index) => (
@@ -508,8 +560,8 @@ const PatientHealthModal: React.FC = () => {
                   }}
                 >
                   <CardContent className="pt-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="medication">Current Medications</Label>
+                    <div className="space-y-3">
+                      <Label htmlFor="medication" className="text-lg font-medium">Current Medications</Label>
                       <div className="flex space-x-2">
                         <Input
                           id="medication"
@@ -531,7 +583,7 @@ const PatientHealthModal: React.FC = () => {
                           Add
                         </MotionButton>
                       </div>
-                      <div className="flex flex-wrap gap-2 mt-2">
+                      <div className="flex flex-wrap gap-2 mt-3">
                         <AnimatePresence>
                           {healthCondition.medications.map(
                             (medication, index) => (
@@ -565,24 +617,20 @@ const PatientHealthModal: React.FC = () => {
               </motion.div>
 
               <motion.div className="space-y-2" variants={itemVariants}>
-                <Label htmlFor="notes">Additional Notes</Label>
+                <Label htmlFor="notes" className="text-lg font-medium">Additional Notes</Label>
                 <Textarea
                   id="notes"
                   value={healthCondition.notes}
-                  onChange={(e) =>
-                    setHealthCondition((prev) => ({
-                      ...prev,
-                      notes: e.target.value,
-                    }))
-                  }
+                  onChange={handleNotesChange}
                   placeholder="Enter any additional notes about the patient's health"
-                  rows={3}
+                  rows={4}
+                  className="min-h-32"
                 />
               </motion.div>
             </motion.div>
 
             <motion.div
-              className="flex justify-between"
+              className="flex justify-between pt-4"
               variants={containerVariants}
               initial="hidden"
               animate="visible"
@@ -592,6 +640,7 @@ const PatientHealthModal: React.FC = () => {
                 onClick={() => setActiveTab("patient-details")}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                size="lg"
               >
                 Back
               </MotionButton>
@@ -599,15 +648,16 @@ const PatientHealthModal: React.FC = () => {
                 onClick={handleSubmit}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                size="lg"
               >
                 Submit
               </MotionButton>
             </motion.div>
           </TabsContent>
         </Tabs>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 };
 
-export default PatientHealthModal;
+export default GetHealthInfoPage;
