@@ -1,4 +1,4 @@
-// pages/login.tsx
+"use client"
 import React, { useState, useEffect, useRef } from 'react';
 import { useTheme } from 'next-themes';
 import { motion } from 'framer-motion';
