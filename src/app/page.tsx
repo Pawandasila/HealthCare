@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
 import { motion } from "framer-motion";
 import {
   Card,
@@ -18,15 +18,10 @@ import {
   HeartPulse,
   Shield,
   ArrowRight,
-  ChevronDown,
   ExternalLink,
 } from "lucide-react";
 import type { ButtonHTMLAttributes } from "react";
 import Image from "next/image";
-import gsap from "gsap-trial/dist/gsap";
-import { ScrollTrigger } from "gsap-trial/dist/ScrollTrigger";
-import { ScrollSmoother } from "gsap-trial/dist/ScrollSmoother";
-import { useGSAP } from "@gsap/react";
 import {
   fadeInUp,
   logoVariants,
