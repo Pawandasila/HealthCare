@@ -1,19 +1,15 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef, useContext } from "react";
 import { motion, Variants } from "framer-motion";
 import Head from "next/head";
 import Link from "next/link";
 import {
-  SunIcon,
-  MoonIcon,
   HeartPulse,
   User,
   Mail,
   KeyRound,
-  Building,
-  Phone,
-  UserPlus,
 } from "lucide-react";
+import { GFContext } from "@/context/AuthContext";
 
 interface SignupFormData {
   firstName: string;
@@ -50,11 +46,9 @@ const HospitalSignup: React.FC = () => {
     confirmPassword: "",
     phoneNumber: "",
   });
-
+  const { baseURL, login } = useContext(GFContext); 
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [isSuccess, setIsSuccess] = useState<boolean>(false);
-
   const formRef = useRef<HTMLFormElement>(null);
   const logoRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -102,16 +96,16 @@ const HospitalSignup: React.FC = () => {
       isValid = false;
     }
 
-    if (!formData.phoneNumber) {
-      newErrors.phoneNumber = "Phone number is required";
-      isValid = false;
-    } else {
-      const phoneRegex = /^\+?[0-9]{10,14}$/;
-      if (!phoneRegex.test(formData.phoneNumber.replace(/\s+/g, ""))) {
-        newErrors.phoneNumber = "Please enter a valid phone number";
-        isValid = false;
-      }
-    }
+    // if (!formData.phoneNumber) {
+    //   newErrors.phoneNumber = "Phone number is required";
+    //   isValid = false;
+    // } else {
+    //   const phoneRegex = /^\+?[0-9]{10,14}$/;
+    //   if (!phoneRegex.test(formData.phoneNumber.replace(/\s+/g, ""))) {
+    //     newErrors.phoneNumber = "Please enter a valid phone number";
+    //     isValid = false;
+    //   }
+    // }
 
     setErrors(newErrors);
     return isValid;
@@ -131,27 +125,36 @@ const HospitalSignup: React.FC = () => {
   const handleSubmit = async (
     e: React.FormEvent<HTMLFormElement>
   ): Promise<void> => {
+    
     e.preventDefault();
-
+    
     if (!validateForm()) {
       return;
     }
 
     setIsSubmitting(true);
-
-    try {
-      console.log("Form submitted:", formData);
-
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      setIsSuccess(true);
-
-      setTimeout(() => {}, 2000);
-    } catch (err) {
-      setErrors({ general: "Registration failed. Please try again." });
-    } finally {
-      setIsSubmitting(false);
+    
+    const res = await fetch(baseURL + '/auth/register/', {
+      method: "POST", 
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username: formData.email,
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        email: formData.email,
+        password: formData.password
+      }),
+    })
+    if(res.status === 201) {
+      // const data = await res.json();
+      await login(formData.email, formData.password);
+      
+    } else {
+      console.error("Error signup");
     }
+    
   };
 
   return (
@@ -186,33 +189,7 @@ const HospitalSignup: React.FC = () => {
             </p>
           </div>
 
-          {isSuccess ? (
-            <motion.div
-              className="bg-green-100 dark:bg-green-800/50 p-6 rounded-lg shadow-md text-center"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5 }}
-            >
-              <div className="flex justify-center mb-4">
-                <div className="bg-green-200 dark:bg-green-700 p-3 rounded-full">
-                  <UserPlus className="h-8 w-8 text-green-700 dark:text-green-200" />
-                </div>
-              </div>
-              <h2 className="text-xl font-bold text-green-800 dark:text-green-200 mb-2">
-                Registration Successful!
-              </h2>
-              <p className="text-green-700 dark:text-green-300 mb-4">
-                Your account has been created successfully. You will be
-                redirected to the login page shortly.
-              </p>
-              <Link
-                href="/login"
-                className="inline-block bg-green-600 hover:bg-green-700 text-white py-2 px-6 rounded-md font-medium transition-colors duration-300"
-              >
-                Proceed to Login
-              </Link>
-            </motion.div>
-          ) : (
+          
             <motion.div
               className="bg-white/90 dark:bg-gray-800/90 rounded-lg shadow-xl p-8 backdrop-blur-sm transition-colors duration-300"
               initial={{ opacity: 0, y: 20 }}
@@ -473,7 +450,6 @@ const HospitalSignup: React.FC = () => {
                 </div>
               </form>
             </motion.div>
-          )}
         </div>
       </div>
     </div>

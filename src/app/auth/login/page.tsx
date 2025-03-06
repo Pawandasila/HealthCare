@@ -1,9 +1,10 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef, useContext } from "react";
 import { motion, Variants } from "framer-motion";
 import Head from "next/head";
 import Link from "next/link";
-import { SunIcon, MoonIcon, HeartPulse } from "lucide-react";
+import { HeartPulse } from "lucide-react";
+import { GFContext } from "@/context/AuthContext";
 
 interface FormData {
   email: string;
@@ -32,7 +33,7 @@ const HospitalLogin: React.FC = () => {
     email: "",
     password: "",
   });
-
+  const {login}  = useContext(GFContext);
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
@@ -83,10 +84,10 @@ const HospitalLogin: React.FC = () => {
     e: React.FormEvent<HTMLFormElement>
   ): Promise<void> => {
     e.preventDefault();
-
     if (!validateForm()) {
       return;
     }
+    login(formData.email, formData.password);
 
     setIsSubmitting(true);
 
@@ -94,7 +95,7 @@ const HospitalLogin: React.FC = () => {
       console.log("Form submitted:", formData);
 
       await new Promise((resolve) => setTimeout(resolve, 1000));
-    } catch (err) {
+    } catch {
       setErrors({ general: "Invalid credentials. Please try again." });
     } finally {
       setIsSubmitting(false);
@@ -245,7 +246,7 @@ const HospitalLogin: React.FC = () => {
                   className="text-blue-600 dark:text-blue-400 hover:underline font-medium transition-colors duration-300"
                 >
 
-                  sign up
+                  Sign Up
                 </Link>
               </p>
             </div>

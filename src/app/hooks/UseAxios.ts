@@ -7,7 +7,6 @@ import axios, {
 } from "axios";
 import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 import { useContext } from "react";
 import {GFContext} from "@/context/AuthContext";
 // import { toast } from "sonner";
@@ -27,8 +26,6 @@ const useAxios = (): AxiosInstance => {
       Authorization: `Bearer ${authToken?.access}`,
     },
   });
-
-  console.log("kuch to ayega ")
 
   axiosInstance.interceptors.request.use(
     async (req: InternalAxiosRequestConfig) => {
@@ -75,9 +72,9 @@ const useAxios = (): AxiosInstance => {
         router.push("/auth/login");
       }
       else if (error.response && error.response.status) {
-        toast.error(`An error (${error.response.status}) occurred`);
+        console.log(`An error (${error.response.status}) occurred`);
       } else {
-        toast.error("Something Went Wrong");
+        console.error("Something Went Wrong");
       }
       return error.response;
     }
