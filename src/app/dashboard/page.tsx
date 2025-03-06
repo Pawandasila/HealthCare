@@ -28,10 +28,11 @@ import {
 
 import LabResultsTimeline from "@/components/custom/LabResult";
 import HealthcareMessaging from "@/components/custom/Message";
-import PatientHealthModal from "@/components/custom/PatientHealthModel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import QuickAction from "@/components/custom/QuickAction";
 import AppointmentsSection from "@/components/custom/Appointment";
+import useAxios from "../hooks/UseAxios";
+import GetHealthInfoPage from "@/components/custom/PatientHealthModel";
 
 
 // Type definitions
@@ -242,6 +243,14 @@ export default function PatientDashboard() {
       startDate: "2024-10-10",
     },
   ]);
+  const [userInfo, setUserInfo] = useState<any>(null);
+  const api = useAxios()
+  const getUserInfo = async () => {
+    const res = await api.get('/userInfo/')
+    if(res.status == 200){
+      setUserInfo(res.data)
+    }
+  }
 
   const [labResults, setLabResults] = useState<LabResult[]>([
     {
@@ -352,17 +361,16 @@ export default function PatientDashboard() {
   const [progressValue, setProgressValue] = useState(0);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setProgressValue(100);
-    }, 500);
-    return () => clearTimeout(timer);
+    getUserInfo();
   }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">
       <main className="container mx-auto py-6 px-4">
-        <PatientHealthModal />
-        {/* Patient Header */}
+        
+        {userInfo && !userInfo.dob ? <GetHealthInfoPage getUserInfo={getUserInfo}/>  :(
+          <>
+          {/* Patient Header */}
         <motion.div
           className="flex items-center justify-between mb-6"
           initial={{ opacity: 0, y: -20 }}
@@ -582,6 +590,10 @@ export default function PatientDashboard() {
 
         {/* Quick Actions */}
         <QuickAction/>
+        </>
+        )}
+        
+        
 
       </main>
     </div>
