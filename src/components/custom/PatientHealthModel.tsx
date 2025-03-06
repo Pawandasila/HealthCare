@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
+import useAxios from "@/app/hooks/UseAxios";
 
 interface PatientDetails {
   dob: string;
@@ -19,18 +20,7 @@ interface PatientDetails {
   gender: string;
 }
 
-interface FormData {
-  dob: string;
-  address: string;
-  phone: string;
-  blood_group: string;
-  height: string;
-  weight: string;
-  gender: string;
-  disease: string;
-  allergies: string;
-  medications: string;
-}
+
 
 // For UI display purposes
 interface HealthCondition {
@@ -45,7 +35,10 @@ const MotionButton = motion(Button);
 const MotionCard = motion(Card);
 const MotionBadge = motion(Badge);
 
-const GetHealthInfoPage: React.FC = () => {
+interface GetHealthProps {
+  getUserInfo : () => void;
+}
+const GetHealthInfoPage = ({getUserInfo}: GetHealthProps) => {
   // State
   const [activeTab, setActiveTab] = useState<string>("patient-details");
   const [patientDetails, setPatientDetails] = useState<PatientDetails>({
@@ -66,18 +59,7 @@ const GetHealthInfoPage: React.FC = () => {
     medications: [],
   });
 
-  const [formData, setFormData] = useState<FormData>({
-    disease: "",
-    allergies: "",
-    medications: "",
-    dob: "",
-    blood_group: "",
-    height: "",
-    weight: "",
-    gender: "",
-    address: "",
-    phone: "",
-  });
+
 
   const [currentInput, setCurrentInput] = useState<{
     disease: string;
@@ -91,15 +73,7 @@ const GetHealthInfoPage: React.FC = () => {
     medication: "",
   });
 
-  // Sync arrays to string fields in formData whenever healthCondition changes
-  useEffect(() => {
-    setFormData(prev => ({
-      ...prev,
-      disease: healthCondition.diseases.join(', '),
-      allergies: healthCondition.allergies.join(', '),
-      medications: healthCondition.medications.join(', ')
-    }));
-  }, [healthCondition]);
+  
 
   // Handlers
   const handlePatientDetailsChange = (
@@ -159,26 +133,30 @@ const GetHealthInfoPage: React.FC = () => {
       notes: value
     }));
   };
-
-  const handleSubmit = () => {
-    // Create the final form data by combining patientDetails and formData
+  const api = useAxios();
+  const handleSubmit = async () => {
+    // Create the final form data by combining patientDetails and healthCondition
     const finalData = {
-      ...patientDetails,
-      dob: formData.dob || patientDetails.dob,
-      blood_group: formData.blood_group || patientDetails.blood_group,
-      height: formData.height || patientDetails.height,
-      weight: formData.weight || patientDetails.weight,
-      gender: formData.gender || patientDetails.gender,
-      address: formData.address,
-      phone: formData.phone,
-      disease: formData.disease,  // String format
-      allergies: formData.allergies,  // String format
-      medications: formData.medications,  // String format
-      notes: healthCondition.notes
+      dob: patientDetails.dob,
+      blood_group: patientDetails.blood_group,
+      height: patientDetails.height,
+      weight: patientDetails.weight,
+      gender: patientDetails.gender,
+      address: patientDetails.address,
+      phone: patientDetails.phone,
+      disease: healthCondition.diseases.join(', '),
+      allergies: healthCondition.allergies.join(', '),
+      medications: healthCondition.medications.join(', '),
+      notes: healthCondition.notes,
     };
     
+    const res = await api.post('/userInfo/', finalData);
     // Process form submission here
-    console.log("Final submission data:", finalData);
+    if(res.status === 200) {
+      getUserInfo();
+    }
+    
+    console.log(res);
     alert("Patient information submitted successfully!");
     // Reset form or redirect as needed
   };

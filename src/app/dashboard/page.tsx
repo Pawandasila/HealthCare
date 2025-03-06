@@ -368,7 +368,7 @@ export default function PatientDashboard() {
     <div className="min-h-screen bg-gray-50">
       <main className="container mx-auto py-6 px-4">
         
-        {userInfo && !userInfo.dob ? <GetHealthInfoPage />  :(
+        {userInfo && !userInfo.dob ? <GetHealthInfoPage getUserInfo={getUserInfo}/>  :(
           <>
           {/* Patient Header */}
         <motion.div
