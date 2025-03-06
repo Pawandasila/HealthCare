@@ -28,6 +28,7 @@ import {
   pulseVariants,
   staggerChildren,
 } from "@/components/types/type";
+import Link from "next/link";
 
 interface AnimatedButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
@@ -123,9 +124,11 @@ const MedTechLanding = () => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.5 }}
         >
+          <Link href="/auth/login">
           <AnimatedButton className="px-6 py-2 shadow-md">
             Get Started <ArrowRight className="ml-2 h-4 w-4" />
           </AnimatedButton>
+          </Link>
         </motion.div>
       </nav>
 

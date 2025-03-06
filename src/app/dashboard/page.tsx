@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -16,24 +16,23 @@ import {
   TableRow,
   TableCell,
 } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
-  Bell,
-  User,
   Calendar,
   Pill,
   FileText,
   MessageSquare,
-  Heart,
-  Activity,
-  ClipboardList,
-  Clock,
   FileDown,
 } from "lucide-react";
+
+import LabResultsTimeline from "@/components/custom/LabResult";
+import HealthcareMessaging from "@/components/custom/Message";
+import PatientHealthModal from "@/components/custom/PatientHealthModel";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import QuickAction from "@/components/custom/QuickAction";
+import AppointmentsSection from "@/components/custom/Appointment";
+
 
 // Type definitions
 interface Appointment {
@@ -84,22 +83,28 @@ interface Message {
   isRead: boolean;
 }
 
-interface VitalSign {
-  id: string;
-  date: string;
-  heartRate: number;
-  bloodPressure: string;
-  temperature: number;
-  bloodGlucose: number;
-  oxygenLevel: number;
-  weight: number;
-}
 
-// Create a motion button component using the Button component
 const MotionButton = motion(Button);
 
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.4 },
+  },
+};
+
+const buttonVariants = {
+  initial: { scale: 1 },
+  hover: { scale: 1.05 },
+  tap: { scale: 0.95 },
+};
+
+
+
 export default function PatientDashboard() {
-  // Sample patient data
   const patientInfo = {
     name: "John Smith",
     age: 45,
@@ -112,7 +117,6 @@ export default function PatientDashboard() {
     allergies: ["Penicillin", "Shellfish"],
   };
 
-  // Sample data
   const [upcomingAppointments, setUpcomingAppointments] = useState<
     Appointment[]
   >([
@@ -300,41 +304,6 @@ export default function PatientDashboard() {
     },
   ]);
 
-  // Updated with IDs for each vital sign record
-  const [vitalSigns, setVitalSigns] = useState<VitalSign[]>([
-    {
-      id: "vs1",
-      date: "2025-02-28",
-      heartRate: 72,
-      bloodPressure: "128/82",
-      temperature: 98.6,
-      bloodGlucose: 110,
-      oxygenLevel: 98,
-      weight: 185,
-    },
-    {
-      id: "vs2",
-      date: "2025-02-15",
-      heartRate: 75,
-      bloodPressure: "130/85",
-      temperature: 98.4,
-      bloodGlucose: 115,
-      oxygenLevel: 97,
-      weight: 187,
-    },
-    {
-      id: "vs3",
-      date: "2025-02-01",
-      heartRate: 78,
-      bloodPressure: "132/88",
-      temperature: 98.7,
-      bloodGlucose: 118,
-      oxygenLevel: 98,
-      weight: 188,
-    },
-  ]);
-
-  // Animation variants
   const fadeInUp = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0 },
@@ -349,12 +318,6 @@ export default function PatientDashboard() {
         "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
       transition: { duration: 0.2 },
     },
-  };
-
-  const buttonVariants = {
-    initial: { scale: 1 },
-    hover: { scale: 1.05 },
-    tap: { scale: 0.95 },
   };
 
   const rowVariants = {
@@ -387,6 +350,7 @@ export default function PatientDashboard() {
 
   // Animate progress bars on load
   const [progressValue, setProgressValue] = useState(0);
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setProgressValue(100);
@@ -394,37 +358,10 @@ export default function PatientDashboard() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Function to get custom badge styling based on status
-  const getBadgeVariant = (status: string) => {
-    switch (status) {
-      case "Completed":
-        return "outline";
-      case "Processing":
-        return "default";
-      case "Pending":
-        return "secondary";
-      default:
-        return "outline";
-    }
-  };
-
-  // Function to get custom badge colors based on status
-  const getBadgeColors = (status: string) => {
-    switch (status) {
-      case "Completed":
-        return "bg-green-100 text-green-800 border-green-300";
-      case "Processing":
-        return "bg-blue-100 text-blue-800 border-blue-300";
-      case "Pending":
-        return "bg-gray-100 text-gray-800 border-gray-300";
-      default:
-        return "";
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gray-50">
       <main className="container mx-auto py-6 px-4">
+        <PatientHealthModal />
         {/* Patient Header */}
         <motion.div
           className="flex items-center justify-between mb-6"
@@ -565,7 +502,16 @@ export default function PatientDashboard() {
             </Card>
           </motion.div>
 
-          <motion.div key="messages" variants={cardVariants} whileHover="hover">
+          <motion.div
+            key="messages"
+            variants={cardVariants}
+            whileHover="hover"
+            onClick={() =>
+              document
+                .getElementById("message")
+                ?.scrollIntoView({ behavior: "smooth" })
+            }
+          >
             <Card>
               <CardHeader className="pb-2">
                 <div className="flex items-center">
@@ -604,808 +550,39 @@ export default function PatientDashboard() {
           </motion.div>
         </motion.div>
 
-        <motion.div
-          className="grid grid-cols-1 gap-6 mb-6"
-          initial="hidden"
-          animate="visible"
-          variants={fadeInUp}
-          transition={{ delay: 0.3 }}
-        >
-          {/* Appointments Tabs */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Appointments</CardTitle>
-              <CardDescription>
-                View your upcoming and past appointments
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Tabs defaultValue="upcoming">
-                <TabsList className="mb-4">
-                  <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
-                  <TabsTrigger value="past">Past Visits</TabsTrigger>
-                </TabsList>
-
-                <AnimatePresence mode="wait">
-                  <TabsContent value="upcoming">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Doctor</TableHead>
-                          <TableHead>Specialty</TableHead>
-                          <TableHead>Date</TableHead>
-                          <TableHead>Time</TableHead>
-                          <TableHead>Location</TableHead>
-                          <TableHead>Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {upcomingAppointments.map((appointment, i) => (
-                          <motion.tr
-                            key={i}
-                            custom={i}
-                            initial="hidden"
-                            animate="visible"
-                            whileHover="hover"
-                            variants={rowVariants}
-                            className="cursor-pointer"
-                          >
-                            <TableCell className="font-medium">
-                              {appointment.doctorName}
-                            </TableCell>
-                            <TableCell>{appointment.specialty}</TableCell>
-                            <TableCell>{appointment.date}</TableCell>
-                            <TableCell>{appointment.time}</TableCell>
-                            <TableCell>{appointment.location}</TableCell>
-                            <TableCell>
-                              <MotionButton
-                                variant="outline"
-                                size="sm"
-                                whileHover={buttonVariants.hover}
-                                whileTap={buttonVariants.tap}
-                              >
-                                <Calendar className="w-4 h-4 mr-2" />
-                                Reschedule
-                              </MotionButton>
-                            </TableCell>
-                          </motion.tr>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TabsContent>
-
-                  <TabsContent value="past">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Date</TableHead>
-                          <TableHead>Doctor</TableHead>
-                          <TableHead>Specialty</TableHead>
-                          <TableHead>Diagnosis</TableHead>
-                          <TableHead>Report</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {pastAppointments.map((appointment, i) => (
-                          <motion.tr
-                            key={i}
-                            custom={i}
-                            initial="hidden"
-                            animate="visible"
-                            whileHover="hover"
-                            variants={rowVariants}
-                            className="cursor-pointer"
-                          >
-                            <TableCell className="font-medium">
-                              {appointment.date}
-                            </TableCell>
-                            <TableCell>{appointment.doctorName}</TableCell>
-                            <TableCell>{appointment.specialty}</TableCell>
-                            <TableCell>{appointment.diagnosis}</TableCell>
-                            <TableCell>
-                              {appointment.hasReport && (
-                                <MotionButton
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() =>
-                                    handleDownloadReport(appointment.reportId!)
-                                  }
-                                  whileHover={buttonVariants.hover}
-                                  whileTap={buttonVariants.tap}
-                                >
-                                  <motion.div
-                                    animate={{ y: [0, -3, 0] }}
-                                    transition={{
-                                      duration: 1.5,
-                                      repeat: Infinity,
-                                      repeatDelay: 2,
-                                    }}
-                                  >
-                                    <FileDown className="w-4 h-4 mr-2" />
-                                  </motion.div>
-                                  Download
-                                </MotionButton>
-                              )}
-                            </TableCell>
-                          </motion.tr>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TabsContent>
-                </AnimatePresence>
-              </Tabs>
-            </CardContent>
-          </Card>
-        </motion.div>
+       <AppointmentsSection/>
 
         <motion.div
-          className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6"
-          initial="hidden"
-          animate="visible"
+          className="grid grid-cols-1 md:grid-cols-2 gap-8"
           variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          id="message"
         >
-          {/* Health Summary */}
+          {/* Lab Results Section */}
           <motion.div
-            className="lg:col-span-2"
-            variants={cardVariants}
-            whileHover="hover"
+            className="bg-white rounded-xl shadow-md overflow-hidden"
+            variants={itemVariants}
           >
-            <Card>
-              <CardHeader>
-                <CardTitle>Health Summary</CardTitle>
-                <CardDescription>
-                  View your latest vital signs and health metrics
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Tabs defaultValue="vitals">
-                  <TabsList className="mb-4">
-                    <TabsTrigger value="vitals">Vital Signs</TabsTrigger>
-                    <TabsTrigger value="metrics">Health Metrics</TabsTrigger>
-                  </TabsList>
-
-                  <AnimatePresence mode="wait">
-                    <TabsContent value="vitals">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-4">
-                          <motion.div
-                            className="space-y-3"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: 0.2 }}
-                          >
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center">
-                                <motion.div
-                                  animate={{
-                                    scale: [1, 1.2, 1],
-                                  }}
-                                  transition={{
-                                    duration: 1.5,
-                                    repeat: Infinity,
-                                  }}
-                                >
-                                  <Heart className="w-4 h-4 mr-2 text-red-500" />
-                                </motion.div>
-                                <span className="text-sm font-medium">
-                                  Heart Rate
-                                </span>
-                              </div>
-                              <span className="text-lg font-semibold">
-                                {vitalSigns[0].heartRate} bpm
-                              </span>
-                            </div>
-                            <motion.div
-                              initial={{ width: 0 }}
-                              animate={{ width: "100%" }}
-                              transition={{ duration: 1 }}
-                            >
-                              <Progress
-                                value={(vitalSigns[0].heartRate / 120) * 100}
-                                className="h-2"
-                              />
-                            </motion.div>
-                            <p className="text-xs text-gray-500">
-                              Normal range: 60-100 bpm
-                            </p>
-                          </motion.div>
-
-                          <motion.div
-                            className="space-y-2"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: 0.3 }}
-                          >
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm font-medium">
-                                Blood Pressure
-                              </span>
-                              <span className="text-lg font-semibold">
-                                {vitalSigns[0].bloodPressure} mmHg
-                              </span>
-                            </div>
-                            <div className="flex gap-2">
-                              <motion.div
-                                initial={{ width: 0 }}
-                                animate={{ width: "100%" }}
-                                transition={{ duration: 1, delay: 0.2 }}
-                              >
-                                <Progress
-                                  value={
-                                    (parseInt(
-                                      vitalSigns[0].bloodPressure.split("/")[0]
-                                    ) /
-                                      180) *
-                                    100
-                                  }
-                                  className="h-2"
-                                />
-                              </motion.div>
-                            </div>
-                            <p className="text-xs text-gray-500">
-                              Target: Below 120/80 mmHg
-                            </p>
-                          </motion.div>
-
-                          <motion.div
-                            className="space-y-2"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: 0.4 }}
-                          >
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm font-medium">
-                                Temperature
-                              </span>
-                              <span className="text-lg font-semibold">
-                                {vitalSigns[0].temperature}°F
-                              </span>
-                            </div>
-                            <div className="flex gap-2">
-                              <motion.div
-                                initial={{ width: 0 }}
-                                animate={{ width: "100%" }}
-                                transition={{ duration: 1, delay: 0.3 }}
-                              >
-                                <Progress
-                                  value={
-                                    ((vitalSigns[0].temperature - 97) / 5) * 100
-                                  }
-                                  className="h-2"
-                                />
-                              </motion.div>
-                            </div>
-                            <p className="text-xs text-gray-500">
-                              Normal: 97.7-99.5°F
-                            </p>
-                          </motion.div>
-                        </div>
-
-                        <div className="space-y-4">
-                          <motion.div
-                            className="space-y-3"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: 0.3 }}
-                          >
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center">
-                                <motion.div
-                                  animate={{
-                                    rotate: [0, 360],
-                                  }}
-                                  transition={{
-                                    duration: 3,
-                                    repeat: Infinity,
-                                    ease: "linear",
-                                  }}
-                                >
-                                  <Activity className="w-4 h-4 mr-2 text-blue-500" />
-                                </motion.div>
-                                <span className="text-sm font-medium">
-                                  Blood Glucose
-                                </span>
-                              </div>
-                              <span className="text-lg font-semibold">
-                                {vitalSigns[0].bloodGlucose} mg/dL
-                              </span>
-                            </div>
-                            <motion.div
-                              initial={{ width: 0 }}
-                              animate={{ width: "100%" }}
-                              transition={{ duration: 1, delay: 0.1 }}
-                            >
-                              <Progress
-                                value={
-                                  ((vitalSigns[0].bloodGlucose - 70) / 130) *
-                                  100
-                                }
-                                className="h-2"
-                              />
-                            </motion.div>
-                            <p className="text-xs text-gray-500">
-                              Target: 70-130 mg/dL before meals
-                            </p>
-                          </motion.div>
-
-                          <motion.div
-                            className="space-y-2"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: 0.4 }}
-                          >
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm font-medium">
-                                Oxygen Level
-                              </span>
-                              <span className="text-lg font-semibold">
-                                {vitalSigns[0].oxygenLevel}%
-                              </span>
-                            </div>
-                            <div className="flex gap-2">
-                              <motion.div
-                                initial={{ width: 0 }}
-                                animate={{ width: "100%" }}
-                                transition={{ duration: 1, delay: 0.2 }}
-                              >
-                                <Progress
-                                  value={vitalSigns[0].oxygenLevel}
-                                  className="h-2"
-                                />
-                              </motion.div>
-                            </div>
-                            <p className="text-xs text-gray-500">
-                              Normal: 95-100%
-                            </p>
-                          </motion.div>
-
-                          <motion.div
-                            className="space-y-2"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: 0.5 }}
-                          >
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm font-medium">
-                                Weight
-                              </span>
-                              <span className="text-lg font-semibold">
-                                {vitalSigns[0].weight} lbs
-                              </span>
-                            </div>
-                            <div className="flex gap-2">
-                              <motion.div
-                                initial={{ width: 0 }}
-                                animate={{ width: "100%" }}
-                                transition={{ duration: 1, delay: 0.3 }}
-                              >
-                                <Progress
-                                  value={(vitalSigns[0].weight / 250) * 100}
-                                  className="h-2"
-                                />
-                              </motion.div>
-                            </div>
-                            <p className="text-xs text-gray-500">
-                              Trend:{" "}
-                              {vitalSigns[0].weight - vitalSigns[1].weight > 0
-                                ? `+${
-                                    vitalSigns[0].weight - vitalSigns[1].weight
-                                  }`
-                                : vitalSigns[0].weight -
-                                  vitalSigns[1].weight}{" "}
-                              lbs from last visit
-                            </p>
-                          </motion.div>
-                        </div>
-                      </div>
-                    </TabsContent>
-
-                    <TabsContent value="metrics">
-                      <motion.div
-                        className="space-y-6"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                      >
-                        <div>
-                          <h3 className="text-lg font-medium mb-2">
-                            Health Overview
-                          </h3>
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <Card>
-                              <CardContent className="pt-6">
-                                <div className="text-center">
-                                  <div className="inline-flex items-center justify-center p-3 bg-blue-100 rounded-full mb-2">
-                                    <Heart className="h-6 w-6 text-blue-700" />
-                                  </div>
-                                  <h4 className="text-lg font-semibold">
-                                    Cardiovascular
-                                  </h4>
-                                  <motion.div
-                                    initial={{ width: 0 }}
-                                    animate={{ width: "75%" }}
-                                    transition={{ duration: 1.5 }}
-                                  >
-                                    <Progress value={75} className="h-2 mt-2" />
-                                  </motion.div>
-                                  <Badge className="mt-2">Good</Badge>
-                                </div>
-                              </CardContent>
-                            </Card>
-
-                            <Card>
-                              <CardContent className="pt-6">
-                                <div className="text-center">
-                                  <div className="inline-flex items-center justify-center p-3 bg-green-100 rounded-full mb-2">
-                                    <Activity className="h-6 w-6 text-green-700" />
-                                  </div>
-                                  <h4 className="text-lg font-semibold">
-                                    Metabolic
-                                  </h4>
-                                  <motion.div
-                                    initial={{ width: 0 }}
-                                    animate={{ width: "82%" }}
-                                    transition={{ duration: 1.5, delay: 0.2 }}
-                                  >
-                                    <Progress value={82} className="h-2 mt-2" />
-                                  </motion.div>
-                                  <Badge className="mt-2" variant="outline">
-                                    Excellent
-                                  </Badge>
-                                </div>
-                              </CardContent>
-                            </Card>
-
-                            <Card>
-                              <CardContent className="pt-6">
-                                <div className="text-center">
-                                  <div className="inline-flex items-center justify-center p-3 bg-yellow-100 rounded-full mb-2">
-                                    <ClipboardList className="h-6 w-6 text-yellow-700" />
-                                  </div>
-                                  <h4 className="text-lg font-semibold">
-                                    Checkups
-                                  </h4>
-                                  <motion.div
-                                    initial={{ width: 0 }}
-                                    animate={{ width: "60%" }}
-                                    transition={{ duration: 1.5, delay: 0.4 }}
-                                  >
-                                    <Progress value={60} className="h-2 mt-2" />
-                                  </motion.div>
-                                  <Badge className="mt-2" variant="secondary">
-                                    Average
-                                  </Badge>
-                                </div>
-                              </CardContent>
-                            </Card>
-                          </div>
-                        </div>
-
-                        <div>
-                          <h3 className="text-lg font-medium mb-2">
-                            Wellness Goals
-                          </h3>
-                          <div className="space-y-4">
-                            <div>
-                              <div className="flex justify-between mb-1">
-                                <span className="text-sm font-medium">
-                                  Physical Activity
-                                </span>
-                                <span className="text-sm text-gray-600">
-                                  3/5 days complete
-                                </span>
-                              </div>
-                              <motion.div
-                                initial={{ width: 0 }}
-                                animate={{ width: "100%" }}
-                                transition={{ duration: 1 }}
-                              >
-                                <Progress value={60} className="h-2" />
-                              </motion.div>
-                            </div>
-
-                            <div>
-                              <div className="flex justify-between mb-1">
-                                <span className="text-sm font-medium">
-                                  Medication Adherence
-                                </span>
-                                <span className="text-sm text-gray-600">
-                                  26/30 days
-                                </span>
-                              </div>
-                              <motion.div
-                                initial={{ width: 0 }}
-                                animate={{ width: "100%" }}
-                                transition={{ duration: 1, delay: 0.2 }}
-                              >
-                                <Progress value={87} className="h-2" />
-                              </motion.div>
-                            </div>
-
-                            <div>
-                              <div className="flex justify-between mb-1">
-                                <span className="text-sm font-medium">
-                                  Blood Pressure Readings
-                                </span>
-                                <span className="text-sm text-gray-600">
-                                  12/15 readings
-                                </span>
-                              </div>
-                              <motion.div
-                                initial={{ width: 0 }}
-                                animate={{ width: "100%" }}
-                                transition={{ duration: 1, delay: 0.4 }}
-                              >
-                                <Progress value={80} className="h-2" />
-                              </motion.div>
-                            </div>
-                          </div>
-                        </div>
-                      </motion.div>
-                    </TabsContent>
-                  </AnimatePresence>
-                </Tabs>
-              </CardContent>
-            </Card>
+            <div className="h-full max-h-[570px] overflow-auto">
+              <LabResultsTimeline />
+            </div>
           </motion.div>
 
-          {/* Medications */}
-          <motion.div variants={cardVariants} whileHover="hover">
-            <Card className="h-full">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Current Medications</CardTitle>
-                  <MotionButton
-                    variant="outline"
-                    size="sm"
-                    whileHover={buttonVariants.hover}
-                    whileTap={buttonVariants.tap}
-                  >
-                    <Pill className="w-4 h-4 mr-2" />
-                    Refill
-                  </MotionButton>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <motion.div
-                  variants={containerVariants}
-                  initial="hidden"
-                  animate="visible"
-                  className="space-y-4"
-                >
-                  {medications.map((medication, i) => (
-                    <motion.div
-                      key={i}
-                      custom={i}
-                      variants={rowVariants}
-                      className="p-3 border rounded-lg hover:bg-gray-50 transition-colors"
-                    >
-                      <div className="flex justify-between">
-                        <h4 className="font-medium">{medication.name}</h4>
-                        <span
-                          className={`text-sm ${
-                            medication.refillsLeft <= 1
-                              ? "text-red-600 font-medium"
-                              : "text-gray-600"
-                          }`}
-                        >
-                          {medication.refillsLeft} refills left
-                        </span>
-                      </div>
-                      <p className="text-sm text-gray-600 mt-1">
-                        {medication.dosage} • {medication.frequency}
-                      </p>
-                      <div className="flex items-center justify-between mt-2">
-                        <span className="text-xs text-gray-500">
-                          Prescribed by {medication.prescribedBy}
-                        </span>
-                        <div className="flex items-center">
-                          <Clock className="w-3 h-3 mr-1 text-gray-400" />
-                          <span className="text-xs text-gray-500">
-                            Refill by{" "}
-                            {new Date(medication.refillBy).toLocaleDateString()}
-                          </span>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                </motion.div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        </motion.div>
-
-        <motion.div
-          className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6"
-          initial="hidden"
-          animate="visible"
-          variants={containerVariants}
-        >
-          {/* Lab Results */}
-          <motion.div variants={cardVariants} whileHover="hover">
-            <Card className="h-full">
-              <CardHeader>
-                <CardTitle>Lab Results</CardTitle>
-                <CardDescription>
-                  View your latest laboratory test results
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {labResults.map((lab, i) => (
-                    <motion.div
-                      key={i}
-                      custom={i}
-                      variants={rowVariants}
-                      className="p-4 border rounded-lg hover:bg-gray-50 transition-colors"
-                    >
-                      <div className="flex justify-between">
-                        <h4 className="font-medium">{lab.testName}</h4>
-                        <Badge
-                          variant="outline"
-                          className={getBadgeColors(lab.status)}
-                        >
-                          {lab.status}
-                        </Badge>
-                      </div>
-                      <div className="flex items-center text-sm text-gray-600 mt-1">
-                        <Calendar className="w-3 h-3 mr-1" />
-                        {lab.date}
-                      </div>
-                      {lab.result && (
-                        <div className="mt-3 flex justify-between items-center">
-                          <div className="flex items-center">
-                            <span className="text-sm font-medium mr-2">
-                              Result:
-                            </span>
-                            <span
-                              className={`text-sm ${
-                                lab.result === "Normal"
-                                  ? "text-green-600"
-                                  : "text-yellow-600"
-                              }`}
-                            >
-                              {lab.result}
-                            </span>
-                          </div>
-                          {lab.hasReport && (
-                            <MotionButton
-                              variant="ghost"
-                              size="sm"
-                              onClick={() =>
-                                handleDownloadReport(lab.reportId!)
-                              }
-                              whileHover={buttonVariants.hover}
-                              whileTap={buttonVariants.tap}
-                            >
-                              <FileDown className="w-4 h-4 mr-1" />
-                              View
-                            </MotionButton>
-                          )}
-                        </div>
-                      )}
-                    </motion.div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          {/* Messages */}
-          <motion.div variants={cardVariants} whileHover="hover">
-            <Card className="h-full">
-              <CardHeader>
-                <CardTitle>Messages</CardTitle>
-                <CardDescription>
-                  Communication with your healthcare team
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {messages.map((message, i) => (
-                    <motion.div
-                      key={i}
-                      custom={i}
-                      variants={rowVariants}
-                      className={`p-4 border rounded-lg hover:bg-gray-50 transition-colors ${
-                        !message.isRead ? "border-blue-300 bg-blue-50" : ""
-                      }`}
-                    >
-                      <div className="flex justify-between">
-                        <h4 className="font-medium">{message.title}</h4>
-                        {!message.isRead && (
-                          <Badge className="bg-blue-100 text-blue-800 border-blue-300">
-                            New
-                          </Badge>
-                        )}
-                      </div>
-                      <p className="text-sm text-gray-600 mt-1">
-                        {message.preview}
-                      </p>
-                      <div className="flex items-center justify-between mt-3">
-                        <span className="text-xs text-gray-500">
-                          From: {message.from}
-                        </span>
-                        <div className="flex items-center">
-                          <Clock className="w-3 h-3 mr-1 text-gray-400" />
-                          <span className="text-xs text-gray-500">
-                            {message.date}
-                          </span>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+          {/* Messaging Section */}
+          <motion.div
+            className="bg-white rounded-xl shadow-md overflow-hidden"
+            variants={itemVariants}
+          >
+            <div className="h-full max-h-[570px]">
+              <HealthcareMessaging />
+            </div>
           </motion.div>
         </motion.div>
 
         {/* Quick Actions */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-          className="mt-8"
-        >
-          <h2 className="text-xl font-bold mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <MotionButton
-              className="h-24 flex flex-col items-center justify-center"
-              whileHover={buttonVariants.hover}
-              whileTap={buttonVariants.tap}
-            >
-              <motion.div
-                animate={{ y: [0, -5, 0] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              >
-                <Calendar className="h-6 w-6 mb-2" />
-              </motion.div>
-              Schedule Appointment
-            </MotionButton>
-            <MotionButton
-              variant="outline"
-              className="h-24 flex flex-col items-center justify-center"
-              whileHover={buttonVariants.hover}
-              whileTap={buttonVariants.tap}
-            >
-              <motion.div
-                animate={{ rotate: [0, 10, 0, -10, 0] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              >
-                <MessageSquare className="h-6 w-6 mb-2" />
-              </motion.div>
-              Message Doctor
-            </MotionButton>
-            <MotionButton
-              variant="outline"
-              className="h-24 flex flex-col items-center justify-center"
-              whileHover={buttonVariants.hover}
-              whileTap={buttonVariants.tap}
-            >
-              <motion.div
-                animate={{ scale: [1, 1.1, 1] }}
-                transition={{ duration: 1.5, repeat: Infinity }}
-              >
-                <Pill className="h-6 w-6 mb-2" />
-              </motion.div>
-              Refill Medication
-            </MotionButton>
-            <MotionButton
-              variant="outline"
-              className="h-24 flex flex-col items-center justify-center"
-              whileHover={buttonVariants.hover}
-              whileTap={buttonVariants.tap}
-            >
-              <motion.div
-                animate={{ rotateY: [0, 180, 360] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              >
-                <ClipboardList className="h-6 w-6 mb-2" />
-              </motion.div>
-              View Medical Records
-            </MotionButton>
-          </div>
-        </motion.div>
+        <QuickAction/>
+
       </main>
     </div>
   );
