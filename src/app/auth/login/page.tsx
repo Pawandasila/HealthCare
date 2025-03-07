@@ -85,8 +85,7 @@ const userRouter = useRouter();
     if (!validateForm()) {
       return;
     }
-    // login(formData.email, formData.password);
-    userRouter.push("/dashboard");
+    login(formData.email, formData.password);
 
     setIsSubmitting(true);
 
