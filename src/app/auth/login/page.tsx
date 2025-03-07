@@ -5,6 +5,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { HeartPulse } from "lucide-react";
 import { GFContext } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 interface FormData {
   email: string;
@@ -41,7 +42,7 @@ const HospitalLogin: React.FC = () => {
   const logoRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const subtitleRef = useRef<HTMLParagraphElement>(null);
-
+const userRouter = useRouter();
   
 
   const validateForm = (): boolean => {
@@ -61,9 +62,6 @@ const HospitalLogin: React.FC = () => {
 
     if (!formData.password) {
       newErrors.password = "Password is required";
-      isValid = false;
-    } else if (formData.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
       isValid = false;
     }
 
@@ -87,7 +85,8 @@ const HospitalLogin: React.FC = () => {
     if (!validateForm()) {
       return;
     }
-    login(formData.email, formData.password);
+    // login(formData.email, formData.password);
+    userRouter.push("/dashboard");
 
     setIsSubmitting(true);
 
@@ -105,10 +104,10 @@ const HospitalLogin: React.FC = () => {
   return (
     <div className="min-h-screen w-full flex flex-col bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900 dark:to-gray-900 transition-colors duration-300">
       <Head>
-        <title>Login | Hospital Management System</title>
+        <title>Login | HealthCare</title>
         <meta
           name="description"
-          content="Login to the Hospital Management System"
+          content="Login to the HealthCare"
         />
       </Head>
 
@@ -125,7 +124,7 @@ const HospitalLogin: React.FC = () => {
               ref={titleRef}
               className="text-4xl font-bold mb-2 text-blue-800 dark:text-blue-200 transition-colors duration-300"
             >
-              Hospital Management System
+              HealthCare
             </h1>
             <p
               ref={subtitleRef}
@@ -254,7 +253,7 @@ const HospitalLogin: React.FC = () => {
 
           <div className="mt-8 text-center">
             <p className="text-xs text-gray-500 dark:text-gray-400 transition-colors duration-300">
-              © {new Date().getFullYear()} Hospital Management System. All
+              © {new Date().getFullYear()} HealthCare. All
               rights reserved.
             </p>
           </div>

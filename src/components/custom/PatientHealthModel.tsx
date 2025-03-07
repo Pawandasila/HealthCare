@@ -216,7 +216,7 @@ const GetHealthInfoPage = ({getUserInfo}: GetHealthProps) => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 sticky top-0 z-10 bg-background mb-6">
+          <TabsList className="grid w-full grid-cols-2 sticky top-0 bg-background mb-6">
             <TabsTrigger value="patient-details">Patient Details</TabsTrigger>
             <TabsTrigger value="health-condition">Health Condition</TabsTrigger>
           </TabsList>

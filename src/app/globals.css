@@ -126,6 +126,10 @@
   }
 }
 
+nextjs-portal {
+  display: none;
+}
+  
 .heading-maya {
   font-family: var(--font-maya);
   font-size: 2.5rem;

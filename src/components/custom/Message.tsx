@@ -1,258 +1,284 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence, useScroll } from 'framer-motion';
-import { Send, Paperclip, ArrowLeft, MoreVertical, Phone, Video, Check, CheckCheck } from 'lucide-react';
-import { format } from 'date-fns';
+import React, { useState, useRef, useEffect, useCallback } from "react";
+import { motion, AnimatePresence, useScroll } from "framer-motion";
+import {
+  Send,
+  Paperclip,
+  ArrowLeft,
+  MoreVertical,
+  Phone,
+  Video,
+  Check,
+  CheckCheck,
+  Bot,
+  Sparkles,
+  User,
+  Loader2,
+} from "lucide-react";
+import { format } from "date-fns";
 
-// TypeScript interfaces
 interface Message {
-  id: number;
+  id: string;
   sender: string;
   avatar?: string;
   content: string;
   timestamp: string;
-  status: 'sent' | 'delivered' | 'read';
+  status: "sent" | "delivered" | "read";
   isProvider: boolean;
+  isAI: boolean;
 }
 
-// Props type for the component
-interface HealthcareMessagingProps {
+interface HealthcareAIChatProps {
   initialMessages?: Message[];
   maxHeight?: string;
 }
 
-const HealthcareMessaging: React.FC<HealthcareMessagingProps> = ({ 
+const HealthcareAIChat: React.FC<HealthcareAIChatProps> = ({
   initialMessages,
-  maxHeight = "600px" // Default max height
+  maxHeight = "600px",
 }) => {
-  // Default messages if none provided
   const defaultMessages: Message[] = [
     {
-      id: 1,
-      sender: "Dr. Sarah Johnson",
+      id: "welcome-message",
+      sender: "Healthcare AI Assistant",
       avatar: "/api/placeholder/40/40",
-      content: "Hi there. I've reviewed your lab results. Your lipid panel shows slightly elevated cholesterol. Let's discuss some dietary changes to address this.",
-      timestamp: "2025-03-06T09:32:00",
+      content:
+        "Hello! I'm your healthcare assistant. How can I help you today with any medical questions or concerns?",
+      timestamp: new Date().toISOString(),
       status: "read",
-      isProvider: true
+      isProvider: true,
+      isAI: true,
     },
-    {
-      id: 2,
-      sender: "You",
-      content: "Thank you Dr. Johnson. I've been wondering about my cholesterol. When would be a good time to discuss this?",
-      timestamp: "2025-03-06T10:15:00",
-      status: "read",
-      isProvider: false
-    },
-    {
-      id: 3,
-      sender: "Dr. Sarah Johnson",
-      avatar: "/api/placeholder/40/40",
-      content: "I have availability tomorrow at 2pm or Friday at 10am. Which works better for you?",
-      timestamp: "2025-03-06T10:22:00",
-      status: "read",
-      isProvider: true
-    },
-    {
-      id: 4,
-      sender: "You",
-      content: "Friday at 10am would be perfect.",
-      timestamp: "2025-03-06T10:30:00",
-      status: "read",
-      isProvider: false
-    },
-    {
-      id: 5,
-      sender: "Dr. Sarah Johnson",
-      avatar: "/api/placeholder/40/40",
-      content: "Great! I've scheduled a virtual appointment for Friday at 10am. You'll receive a reminder notification. In the meantime, try to limit saturated fats and increase fiber intake.",
-      timestamp: "2025-03-06T10:35:00",
-      status: "read",
-      isProvider: true
-    },
-    {
-      id: 6,
-      sender: "Nurse Practitioner Alex Rivera",
-      avatar: "/api/placeholder/40/40",
-      content: "Hello! Just a reminder that you're due for your annual physical. Would you like to schedule that along with your follow-up appointment?",
-      timestamp: "2025-03-07T08:15:00",
-      status: "delivered",
-      isProvider: true
-    }
   ];
-  
-  const [messages, setMessages] = useState<Message[]>(initialMessages || defaultMessages);
+
+  const [messages, setMessages] = useState<Message[]>(
+    initialMessages || defaultMessages
+  );
   const [newMessage, setNewMessage] = useState<string>("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [isTyping, setIsTyping] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [showDateDivider, setShowDateDivider] = useState<boolean>(true);
   const [isAtBottom, setIsAtBottom] = useState<boolean>(true);
   const [showScrollButton, setShowScrollButton] = useState<boolean>(false);
 
-  // Get scroll progress using framer-motion
+  const quickQuestions = React.useMemo(() => [
+    { id: "q1", text: "What foods should I avoid while on medication?" },
+    { id: "q2", text: "How can I manage side effects from my prescriptions?" },
+    { id: "q3", text: "When should I contact my doctor immediately?" },
+    { id: "q4", text: "What exercise is safe with my condition?" },
+  ], []);
+
   const { scrollYProgress } = useScroll({
-    container: scrollContainerRef
+    container: scrollContainerRef,
   });
 
-  // Memoize the scroll state update function to prevent unnecessary re-renders
+  const mockApiResponse = useCallback(async (message: string) => {
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    const messageLower = message.toLowerCase();
+
+    if (
+      messageLower.includes("medication") ||
+      messageLower.includes("pill") ||
+      messageLower.includes("drug")
+    ) {
+      return "It's important to take medications as prescribed. If you're experiencing side effects, don't stop taking them without consulting your doctor first. Would you like me to provide some general information about medication management?";
+    } else if (
+      messageLower.includes("exercise") ||
+      messageLower.includes("workout")
+    ) {
+      return "Regular physical activity is beneficial for most health conditions. Start with low-impact exercises like walking, swimming, or gentle yoga. Always consult your healthcare provider before starting a new exercise regimen, especially if you have existing health concerns.";
+    } else if (
+      messageLower.includes("diet") ||
+      messageLower.includes("food") ||
+      messageLower.includes("eat")
+    ) {
+      return "A balanced diet rich in fruits, vegetables, whole grains, and lean proteins is generally recommended. For specific dietary recommendations related to your health condition, please consult with your healthcare provider or a registered dietitian.";
+    } else if (
+      messageLower.includes("symptom") ||
+      messageLower.includes("pain") ||
+      messageLower.includes("hurt")
+    ) {
+      return "I understand you're experiencing discomfort. While I can provide general information, it's important to discuss your symptoms with your healthcare provider for proper diagnosis and treatment. Would you like to know when symptoms might warrant immediate medical attention?";
+    } else {
+      return "Thank you for your question. While I can provide general health information, for personalized medical advice, please consult with your healthcare provider. Is there anything specific about this topic you'd like to know more about?";
+    }
+  }, []);
+
   const updateScrollState = useCallback(() => {
     if (!scrollContainerRef.current) return;
-    
-    const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
+
+    const { scrollTop, scrollHeight, clientHeight } =
+      scrollContainerRef.current;
     const scrollBottom = scrollHeight - scrollTop - clientHeight;
-    
-    // Consider "at bottom" if within 20px of the bottom
+
     const atBottom = scrollBottom < 20;
     const shouldShowButton = scrollBottom > 100;
-    
-    if (atBottom !== isAtBottom) {
-      setIsAtBottom(atBottom);
-    }
-    
-    if (shouldShowButton !== showScrollButton) {
-      setShowScrollButton(shouldShowButton);
-    }
-  }, [isAtBottom, showScrollButton]);
 
-  // Track scroll position with throttling to improve performance
+    setIsAtBottom(atBottom);
+    setShowScrollButton(shouldShowButton);
+  }, []);
+
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
-    
-    // Use throttling to avoid excessive updates
-    let scrollTimeout: NodeJS.Timeout;
+
     const handleScroll = () => {
-      if (scrollTimeout) clearTimeout(scrollTimeout);
-      scrollTimeout = setTimeout(updateScrollState, 100);
+      requestAnimationFrame(updateScrollState);
     };
-    
-    container.addEventListener('scroll', handleScroll);
+
+    container.addEventListener("scroll", handleScroll);
     return () => {
-      container.removeEventListener('scroll', handleScroll);
-      if (scrollTimeout) clearTimeout(scrollTimeout);
+      container.removeEventListener("scroll", handleScroll);
     };
   }, [updateScrollState]);
 
-  // Auto-scroll to bottom of messages
-  const scrollToBottom = useCallback((behavior: ScrollBehavior = "smooth"): void => {
-    messagesEndRef.current?.scrollIntoView({ behavior });
-  }, []);
-  
-  // When new messages arrive, scroll to bottom if already at bottom
+  const scrollToBottom = useCallback(
+    (behavior: ScrollBehavior = "smooth"): void => {
+      messagesEndRef.current?.scrollIntoView({ behavior });
+    },
+    []
+  );
+
   useEffect(() => {
     if (isAtBottom) {
       scrollToBottom();
-    } else if (showScrollButton) {
-      // Flash the scroll button when new messages arrive and we're not at bottom
-      const button = document.getElementById('scroll-bottom-button');
-      if (button) {
-        button.classList.add('animate-pulse');
-        setTimeout(() => button.classList.remove('animate-pulse'), 1000);
-      }
     }
-  }, [messages, isAtBottom, showScrollButton, scrollToBottom]);
+  }, [messages, isAtBottom, scrollToBottom]);
 
-  // Initial scroll to bottom when component mounts
   useEffect(() => {
     scrollToBottom("auto");
   }, [scrollToBottom]);
 
-  // Format timestamp for display
-  const formatMessageTime = (timestamp: string): string => {
+  const formatMessageTime = useCallback((timestamp: string): string => {
     const date = new Date(timestamp);
-    return format(date, 'h:mm a');
-  };
-  
-  // Format date for dividers
-  const formatMessageDate = (timestamp: string): string => {
+    return format(date, "h:mm a");
+  }, []);
+
+  const formatMessageDate = useCallback((timestamp: string): string => {
     const date = new Date(timestamp);
     const today = new Date();
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
-    
+
     if (date.toDateString() === today.toDateString()) {
       return "Today";
     } else if (date.toDateString() === yesterday.toDateString()) {
       return "Yesterday";
     } else {
-      return format(date, 'MMMM d, yyyy');
+      return format(date, "MMMM d, yyyy");
     }
-  };
-  
-  // Check if message is from a different day than the previous one
-  const isNewDay = (index: number): boolean => {
+  }, []);
+
+  const isNewDay = useCallback((index: number): boolean => {
     if (index === 0) return true;
-    
+
     const currentDate = new Date(messages[index].timestamp).toDateString();
     const prevDate = new Date(messages[index - 1].timestamp).toDateString();
-    
+
     return currentDate !== prevDate;
-  };
+  }, [messages]);
 
-  // Separate input change handler to prevent unnecessary re-renders
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const generateUniqueId = useCallback((prefix: string): string => {
+    return `${prefix}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  }, []);
+
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setNewMessage(e.target.value);
-  };
+  }, []);
 
-  // Send a new message
-  const handleSendMessage = useCallback((): void => {
-    if (newMessage.trim() === "") return;
-    
-    const newMsg: Message = {
-      id: messages.length + 1,
+  const handleQuickQuestion = useCallback((question: string) => {
+    setNewMessage(question);
+    inputRef.current?.focus();
+  }, []);
+
+  const handleSendMessage = useCallback(async (): Promise<void> => {
+    if (newMessage.trim() === "" || isLoading) return;
+
+    const userMsg: Message = {
+      id: generateUniqueId("user"),
       sender: "You",
       content: newMessage,
       timestamp: new Date().toISOString(),
       status: "sent",
-      isProvider: false
+      isProvider: false,
+      isAI: false,
     };
-    
-    setMessages(prev => [...prev, newMsg]);
+
+    setMessages((prev) => [...prev, userMsg]);
+    const currentMessage = newMessage;
     setNewMessage("");
-    setIsAtBottom(true); // Force scroll to bottom when user sends a message
-    
-    // Focus the input field again after sending
+    setIsAtBottom(true);
+
     inputRef.current?.focus();
-    
-    // Simulate typing indicator
+
+    setIsLoading(true);
     setIsTyping(true);
-    
-    // Simulate response from provider after delay
-    setTimeout(() => {
+
+    try {
+      const aiResponseText = await mockApiResponse(currentMessage);
+
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === userMsg.id ? { ...msg, status: "delivered" } : msg
+        )
+      );
+
+      setTimeout(() => {
+        setIsTyping(false);
+
+        const aiResponse: Message = {
+          id: generateUniqueId("ai"),
+          sender: "Healthcare AI Assistant",
+          avatar: "/api/placeholder/40/40",
+          content: aiResponseText,
+          timestamp: new Date().toISOString(),
+          status: "delivered",
+          isProvider: true,
+          isAI: true,
+        };
+
+        setMessages((prev) => [...prev, aiResponse]);
+
+        setTimeout(() => {
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === userMsg.id ? { ...msg, status: "read" } : msg
+            )
+          );
+        }, 1000);
+      }, 1500);
+    } catch (error) {
+      console.error("Error getting AI response:", error);
       setIsTyping(false);
-      
-      // Random response from the provider
-      const responses: string[] = [
-        "I've noted your message. A healthcare provider will respond soon.",
-        "Thank you for your message. The care team will review it and respond within 24 hours.",
-        "Your message has been received. Please allow 1-2 business days for a response."
-      ];
-      
-      const autoResponse: Message = {
-        id: messages.length + 2,
-        sender: "Healthcare Team",
+
+      const errorMsg: Message = {
+        id: generateUniqueId("error"),
+        sender: "System",
         avatar: "/api/placeholder/40/40",
-        content: responses[Math.floor(Math.random() * responses.length)],
+        content: "Sorry, I couldn't process your request. Please try again.",
         timestamp: new Date().toISOString(),
         status: "delivered",
-        isProvider: true
+        isProvider: true,
+        isAI: false,
       };
-      
-      setMessages(prev => [...prev, autoResponse]);
-    }, 3000);
-  }, [messages.length, newMessage]);
 
-  // Handle enter key press
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && newMessage.trim()) {
+      setMessages((prev) => [...prev, errorMsg]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [newMessage, isLoading, mockApiResponse, generateUniqueId]);
+
+  const handleKeyPress = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && newMessage.trim() && !isLoading) {
       handleSendMessage();
     }
-  };
+  }, [newMessage, isLoading, handleSendMessage]);
 
-  // Get status icon based on message status
-  const getStatusIcon = (status: Message['status']) => {
-    switch(status) {
+  const getStatusIcon = useCallback((status: Message["status"]) => {
+    switch (status) {
       case "sent":
         return <Check className="w-3 h-3 text-gray-400" />;
       case "delivered":
@@ -262,17 +288,16 @@ const HealthcareMessaging: React.FC<HealthcareMessagingProps> = ({
       default:
         return null;
     }
-  };
+  }, []);
 
-  // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
-    visible: { 
+    visible: {
       opacity: 1,
-      transition: { duration: 0.3 }
-    }
+      transition: { duration: 0.3 },
+    },
   };
-  
+
   const messageVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: (i: number) => ({
@@ -280,83 +305,124 @@ const HealthcareMessaging: React.FC<HealthcareMessagingProps> = ({
       y: 0,
       transition: {
         delay: i * 0.05,
-        duration: 0.3
-      }
-    })
+        duration: 0.3,
+      },
+    }),
   };
 
-  // Scroll button animation
   const scrollButtonVariants = {
     hidden: { opacity: 0, scale: 0.8 },
     visible: { opacity: 1, scale: 1 },
-    exit: { opacity: 0, scale: 0.8 }
+    exit: { opacity: 0, scale: 0.8 },
   };
 
-  // Memoized Message component to prevent unnecessary re-renders
-  const MessageComponent = React.memo(({ message, index }: { message: Message, index: number }) => {
-    return (
-      <React.Fragment>
-        {/* Date divider */}
-        {index > 0 && isNewDay(index) && (
-          <div className="flex justify-center my-2">
-            <div className="px-3 py-1 bg-gray-200 rounded-full text-xs text-gray-600">
-              {formatMessageDate(message.timestamp)}
-            </div>
-          </div>
-        )}
-        
-        {/* Message bubble */}
-        <motion.div
-          className={`flex ${message.isProvider ? 'justify-start' : 'justify-end'} mb-3`}
-          custom={index}
-          variants={messageVariants}
-          initial="hidden"
-          animate="visible"
-          layout
-        >
-          <div className={`max-w-[80%] flex ${message.isProvider ? 'flex-row' : 'flex-row-reverse'}`}>
-            {message.isProvider && message.avatar && (
-              <div className="mt-1 mr-2">
-                <img
-                  src={message.avatar}
-                  alt={message.sender}
-                  className="w-8 h-8 rounded-full object-cover"
-                />
+  const MessageComponent = React.memo(
+    ({ message, index }: { message: Message; index: number }) => {
+      return (
+        <React.Fragment>
+          {/* Date divider */}
+          {index > 0 && isNewDay(index) && (
+            <div className="flex justify-center my-2">
+              <div className="px-3 py-1 bg-gray-200 rounded-full text-xs text-gray-600">
+                {formatMessageDate(message.timestamp)}
               </div>
-            )}
-            
-            <div>
+            </div>
+          )}
+
+          {/* Message bubble */}
+          <motion.div
+            className={`flex ${
+              message.isProvider ? "justify-start" : "justify-end"
+            } mb-3`}
+            custom={index}
+            variants={messageVariants}
+            initial="hidden"
+            animate="visible"
+            layout
+          >
+            <div
+              className={`max-w-[80%] flex ${
+                message.isProvider ? "flex-row" : "flex-row-reverse"
+              }`}
+            >
               {message.isProvider && (
-                <div className="text-xs text-gray-600 ml-1 mb-1">{message.sender}</div>
+                <div className="mt-1 mr-2 relative">
+                  {message.avatar ? (
+                    <img
+                      src={message.avatar}
+                      alt={message.sender}
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                      <Bot className="w-4 h-4 text-blue-600" />
+                    </div>
+                  )}
+                  {message.isAI && (
+                    <div className="absolute -bottom-1 -right-1 bg-blue-400 rounded-full w-3 h-3 border border-white flex items-center justify-center">
+                      <Sparkles className="w-2 h-2 text-white" />
+                    </div>
+                  )}
+                </div>
               )}
-              
-              <div className={`rounded-lg p-3 break-words ${
-                message.isProvider 
-                  ? 'bg-white border border-gray-200 text-gray-800' 
-                  : 'bg-blue-500 text-white'
-              }`}>
-                <p className="text-sm">{message.content}</p>
-              </div>
-              
-              <div className={`flex mt-1 text-xs text-gray-500 ${
-                message.isProvider ? 'justify-start ml-1' : 'justify-end mr-1'
-              }`}>
-                <span>{formatMessageTime(message.timestamp)}</span>
-                {!message.isProvider && (
-                  <span className="ml-1 flex items-center">
-                    {getStatusIcon(message.status)}
-                  </span>
+
+              {!message.isProvider && (
+                <div className="mt-1 ml-2">
+                  <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                    <User className="w-4 h-4 text-blue-600" />
+                  </div>
+                </div>
+              )}
+
+              <div>
+                {message.isProvider && (
+                  <div className="text-xs text-gray-600 ml-1 mb-1 flex items-center">
+                    {message.sender}
+                    {message.isAI && (
+                      <span className="ml-1 bg-blue-100 text-blue-600 text-xs px-1 rounded-sm">
+                        AI
+                      </span>
+                    )}
+                  </div>
                 )}
+
+                <div
+                  className={`rounded-lg p-3 break-words ${
+                    message.isProvider
+                      ? "bg-white border border-gray-200 text-gray-800"
+                      : "bg-blue-500 text-white"
+                  }`}
+                >
+                  <p className="text-sm">{message.content}</p>
+                </div>
+
+                <div
+                  className={`flex mt-1 text-xs text-gray-500 ${
+                    message.isProvider
+                      ? "justify-start ml-1"
+                      : "justify-end mr-1"
+                  }`}
+                >
+                  <span>{formatMessageTime(message.timestamp)}</span>
+                  {!message.isProvider && (
+                    <span className="ml-1 flex items-center">
+                      {getStatusIcon(message.status)}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        </motion.div>
-      </React.Fragment>
-    );
-  });
-  
-  // Avoid unnecessary re-renders
-  MessageComponent.displayName = 'MessageComponent';
+          </motion.div>
+        </React.Fragment>
+      );
+    }, 
+    (prevProps, nextProps) => {
+      return prevProps.message.id === nextProps.message.id && 
+             prevProps.message.status === nextProps.message.status;
+    }
+  );
+
+  MessageComponent.displayName = "MessageComponent";
 
   return (
     <div className="bg-gray-50 flex flex-col h-full max-h-screen">
@@ -366,46 +432,67 @@ const HealthcareMessaging: React.FC<HealthcareMessagingProps> = ({
         className="flex flex-col h-full max-h-screen"
       >
         {/* Header */}
-        <motion.div 
-          className="px-4 py-3 border-b border-gray-200 bg-white flex items-center justify-between sticky top-0 shadow-sm"
+        <motion.div
+          className="px-4 py-3 border-b border-gray-200 bg-gradient-to-l from-blue-200 to-blue-300 flex items-center justify-between sticky top-0 shadow-sm"
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.3 }}
         >
           <div className="flex items-center">
-            <button className="p-1 mr-2 rounded-full hover:bg-gray-100">
-              <ArrowLeft className="w-5 h-5 text-gray-600" />
+            <button className="p-1 mr-2 rounded-full hover:bg-blue-100 text-blue-600">
+              <ArrowLeft className="w-5 h-5" />
             </button>
             <div className="flex items-center">
               <div className="relative">
-                <img
-                  src="/api/placeholder/36/36"
-                  alt="Healthcare Team"
-                  className="w-9 h-9 rounded-full object-cover border-2 border-blue-100"
-                />
+                <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center border-2 border-blue-100">
+                  <Bot className="w-5 h-5 text-blue-600" />
+                </div>
                 <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border border-white"></div>
               </div>
               <div className="ml-2">
-                <h2 className="font-medium text-sm text-gray-900">Healthcare Team</h2>
-                <p className="text-xs text-green-600">Online</p>
+                <h2 className="font-medium text-sm text-blue-700">
+                  Healthcare AI Assistant
+                </h2>
+                <p className="text-xs text-green-600">
+                  Online | Medical AI Support
+                </p>
               </div>
             </div>
           </div>
           <div className="flex items-center space-x-3">
-            <button className="p-1.5 rounded-full hover:bg-gray-100">
-              <Phone className="w-5 h-5 text-blue-500" />
+            <button className="p-1.5 rounded-full hover:bg-blue-100 text-blue-600">
+              <Phone className="w-5 h-5" />
             </button>
-            <button className="p-1.5 rounded-full hover:bg-gray-100">
-              <Video className="w-5 h-5 text-blue-500" />
+            <button className="p-1.5 rounded-full hover:bg-blue-100 text-blue-600">
+              <Video className="w-5 h-5" />
             </button>
-            <button className="p-1.5 rounded-full hover:bg-gray-100">
-              <MoreVertical className="w-5 h-5 text-gray-600" />
+            <button className="p-1.5 rounded-full hover:bg-blue-100 text-blue-600">
+              <MoreVertical className="w-5 h-5" />
             </button>
           </div>
         </motion.div>
 
+        {/* Quick questions section */}
+        <div className="bg-white p-2 border-b border-blue-200">
+          <p className="text-xs text-blue-600 mb-1 flex items-center">
+            <Sparkles className="h-3 w-3 mr-1" />
+            Suggested Questions
+          </p>
+          <div className="flex flex-wrap gap-1">
+            {quickQuestions.map((q) => (
+              <button
+                key={q.id}
+                className="bg-blue-50 text-blue-600 px-2 py-1 rounded-full text-xs border border-blue-100 hover:bg-blue-100 cursor-pointer"
+                onClick={() => handleQuickQuestion(q.text)}
+              >
+                {q.text}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Messages area */}
-        <motion.div 
+        <motion.div
           ref={scrollContainerRef}
           className="flex-1 overflow-y-auto px-4 py-3 bg-gray-50 relative"
           style={{ maxHeight }}
@@ -420,15 +507,19 @@ const HealthcareMessaging: React.FC<HealthcareMessagingProps> = ({
               </div>
             </div>
           )}
-          
+
           {messages.map((message, index) => (
-            <MessageComponent key={message.id} message={message} index={index} />
+            <MessageComponent
+              key={message.id}
+              message={message}
+              index={index}
+            />
           ))}
-          
+
           {/* Typing indicator */}
-          <AnimatePresence>
+          <AnimatePresence mode="wait">
             {isTyping && (
-              <motion.div 
+              <motion.div
                 className="flex justify-start mb-3"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -437,29 +528,45 @@ const HealthcareMessaging: React.FC<HealthcareMessagingProps> = ({
                 layout
               >
                 <div className="flex items-end">
-                  <div className="mr-2">
-                    <img
-                      src="/api/placeholder/32/32"
-                      alt="Provider"
-                      className="w-8 h-8 rounded-full object-cover"
-                    />
+                  <div className="relative mr-2">
+                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                      <Bot className="w-4 h-4 text-blue-600" />
+                    </div>
+                    <div className="absolute -bottom-1 -right-1 bg-blue-400 rounded-full w-3 h-3 border border-white flex items-center justify-center">
+                      <Sparkles className="w-2 h-2 text-white" />
+                    </div>
                   </div>
                   <div className="bg-white border border-gray-200 rounded-lg px-3 py-2">
                     <div className="flex space-x-1">
-                      <motion.div 
-                        className="w-2 h-2 bg-gray-400 rounded-full"
+                      <motion.div
+                        className="w-2 h-2 bg-blue-400 rounded-full"
                         animate={{ y: [0, -5, 0] }}
-                        transition={{ duration: 0.8, repeat: Infinity, repeatType: "loop", delay: 0 }}
+                        transition={{
+                          duration: 0.8,
+                          repeat: Infinity,
+                          repeatType: "loop",
+                          delay: 0,
+                        }}
                       />
-                      <motion.div 
-                        className="w-2 h-2 bg-gray-400 rounded-full"
+                      <motion.div
+                        className="w-2 h-2 bg-blue-500 rounded-full"
                         animate={{ y: [0, -5, 0] }}
-                        transition={{ duration: 0.8, repeat: Infinity, repeatType: "loop", delay: 0.2 }}
+                        transition={{
+                          duration: 0.8,
+                          repeat: Infinity,
+                          repeatType: "loop",
+                          delay: 0.2,
+                        }}
                       />
-                      <motion.div 
-                        className="w-2 h-2 bg-gray-400 rounded-full"
+                      <motion.div
+                        className="w-2 h-2 bg-blue-600 rounded-full"
                         animate={{ y: [0, -5, 0] }}
-                        transition={{ duration: 0.8, repeat: Infinity, repeatType: "loop", delay: 0.4 }}
+                        transition={{
+                          duration: 0.8,
+                          repeat: Infinity,
+                          repeatType: "loop",
+                          delay: 0.4,
+                        }}
                       />
                     </div>
                   </div>
@@ -467,7 +574,7 @@ const HealthcareMessaging: React.FC<HealthcareMessagingProps> = ({
               </motion.div>
             )}
           </AnimatePresence>
-          
+
           {/* Scroll to bottom button */}
           <AnimatePresence>
             {showScrollButton && (
@@ -482,15 +589,15 @@ const HealthcareMessaging: React.FC<HealthcareMessagingProps> = ({
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
               >
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  width="20" 
-                  height="20" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  strokeWidth="2" 
-                  strokeLinecap="round" 
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
                   strokeLinejoin="round"
                 >
                   <polyline points="6 9 12 15 18 9"></polyline>
@@ -498,52 +605,64 @@ const HealthcareMessaging: React.FC<HealthcareMessagingProps> = ({
               </motion.button>
             )}
           </AnimatePresence>
-          
+
           {/* Invisible element for scroll reference */}
           <div ref={messagesEndRef} />
-          
+
           {/* Scroll progress indicator */}
-          <motion.div 
+          <motion.div
             className="h-1 bg-blue-500 absolute top-0 left-0"
-            style={{ 
+            style={{
               scaleX: scrollYProgress,
-              transformOrigin: "left"
+              transformOrigin: "left",
             }}
           />
         </motion.div>
 
         {/* Input area */}
-        <motion.div 
+        <motion.div
           className="p-3 border-t border-gray-200 bg-white"
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.3, delay: 0.2 }}
         >
-          <div className="flex items-center bg-gray-100 rounded-full px-3 py-1">
-            <button className="p-1 mr-1 text-gray-500 hover:text-blue-500">
+          <div className="flex items-center bg-blue-50 rounded-full px-3 py-1 border border-blue-100">
+            <button className="p-1 mr-1 text-blue-500 hover:text-blue-700">
               <Paperclip className="w-5 h-5" />
             </button>
             <input
               ref={inputRef}
               type="text"
-              placeholder="Type your message..."
+              placeholder="Type your health question here..."
               className="flex-1 bg-transparent border-none focus:outline-none py-2 px-1 text-sm"
               value={newMessage}
               onChange={handleInputChange}
               onKeyPress={handleKeyPress}
+              disabled={isLoading}
             />
-            <motion.button 
-              className={`p-1.5 rounded-full ${newMessage.trim() ? 'bg-blue-500 text-white' : 'text-gray-400'}`}
+            <motion.button
+              className={`p-1.5 rounded-full ${
+                newMessage.trim() && !isLoading
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-300 text-gray-500"
+              }`}
               onClick={handleSendMessage}
-              disabled={!newMessage.trim()}
-              whileHover={newMessage.trim() ? { scale: 1.1 } : {}}
-              whileTap={newMessage.trim() ? { scale: 0.9 } : {}}
+              disabled={!newMessage.trim() || isLoading}
+              whileHover={newMessage.trim() && !isLoading ? { scale: 1.1 } : {}}
+              whileTap={newMessage.trim() && !isLoading ? { scale: 0.9 } : {}}
             >
-              <Send className="w-4 h-4" />
+              {isLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Send className="w-4 h-4" />
+              )}
             </motion.button>
           </div>
           <div className="text-xs text-center mt-2 text-gray-500">
-            <span>Messages are encrypted and HIPAA compliant</span>
+            <span>
+              This is an AI assistant. For medical emergencies, call your
+              healthcare provider.
+            </span>
           </div>
         </motion.div>
       </motion.div>
@@ -551,4 +670,4 @@ const HealthcareMessaging: React.FC<HealthcareMessagingProps> = ({
   );
 };
 
-export default HealthcareMessaging;
+export default React.memo(HealthcareAIChat);

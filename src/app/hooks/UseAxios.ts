@@ -18,7 +18,9 @@ type AuthToken = {
 
 const useAxios = (): AxiosInstance => {
   const { authToken, baseURL , setAuthToken } = useContext(GFContext)
+
   const router = useRouter();
+  
 
   const axiosInstance: AxiosInstance = axios.create({
     baseURL: baseURL,

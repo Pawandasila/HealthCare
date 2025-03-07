@@ -125,9 +125,9 @@ const MedTechLanding = () => {
           transition={{ delay: 0.5 }}
         >
           <Link href="/auth/login">
-          <AnimatedButton className="px-6 py-2 shadow-md">
-            Get Started <ArrowRight className="ml-2 h-4 w-4" />
-          </AnimatedButton>
+            <AnimatedButton className="px-6 py-2 shadow-md">
+              Get Started <ArrowRight className="ml-2 h-4 w-4" />
+            </AnimatedButton>
           </Link>
         </motion.div>
       </nav>
@@ -145,7 +145,7 @@ const MedTechLanding = () => {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.8 }}
           >
-            Advanced AI for&ensp; 
+            Advanced AI for&ensp;
             <motion.span
               className="text-blue-600"
               animate={{
@@ -187,45 +187,62 @@ const MedTechLanding = () => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
         >
+          {/* Background decoration elements */}
           <motion.div
-            className="absolute -top-6 -left-6 w-64 h-64 bg-blue-100 rounded-full mix-blend-multiply filter blur-xl opacity-70"
-            variants={pulseVariants}
-            animate="pulse"
+            className="absolute -top-6 -left-6 w-64 h-64 bg-blue-100 rounded-full mix-blend-multiply filter blur-xl opacity-50"
+            animate={{
+              scale: [1, 1.2, 1],
+              opacity: [0.5, 0.7, 0.5],
+            }}
+            transition={{
+              duration: 4,
+              repeat: Infinity,
+              repeatType: "reverse",
+            }}
           ></motion.div>
           <motion.div
-            className="absolute -bottom-6 -right-6 w-64 h-64 bg-purple-100 rounded-full mix-blend-multiply filter blur-xl opacity-70"
-            variants={pulseVariants}
-            animate="pulse"
+            className="absolute -bottom-6 -right-6 w-64 h-64 bg-purple-100 rounded-full mix-blend-multiply filter blur-xl opacity-50"
+            animate={{
+              scale: [1, 1.3, 1],
+              opacity: [0.5, 0.7, 0.5],
+            }}
             transition={{
               delay: 0.3,
-              duration: 2,
+              duration: 3.5,
               repeat: Infinity,
               repeatType: "reverse",
             }}
           ></motion.div>
+
+          {/* Dashboard image with enhanced animation */}
           <motion.div
-            className="absolute inset-0 w-64 h-64 bg-pink-100 rounded-full mix-blend-multiply filter blur-xl opacity-70"
-            variants={pulseVariants}
-            animate="pulse"
-            transition={{
-              delay: 0.6,
-              duration: 2,
-              repeat: Infinity,
-              repeatType: "reverse",
+            className="relative z-10"
+            initial={{ y: 30, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.7, delay: 0.5 }}
+            whileHover={{
+              y: -15,
+              scale: 1.03,
+              transition: { type: "spring", stiffness: 300, damping: 15 },
             }}
-          ></motion.div>
-          <motion.div
-            className="relative shadow-lg rounded-2xl overflow-hidden"
-            whileHover={{ scale: 1.05 }}
-            transition={{ duration: 0.3 }}
           >
-            <Image
-              src={"/dashboard.webp"}
-              alt="AI-powered healthcare dashboard"
-              className="w-full rounded-2xl shadow-lg"
-              width={100}
-              height={100}
-            />
+            <motion.div
+              className="rounded-2xl shadow-2xl overflow-hidden"
+              whileHover={{
+                boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+              }}
+            >
+              <Image
+                src="/finalDash.png"
+                alt="AI-powered healthcare dashboard"
+                width={1024}
+                height={900}
+                layout="responsive"
+                className="w-full rounded-2xl"
+                // quality={100}
+                priority={true}
+              />
+            </motion.div>
           </motion.div>
         </motion.div>
       </section>

@@ -11,11 +11,6 @@ interface Message {
   timestamp: Date;
 }
 
-interface UserMessage {
-  message: string;
-  type: string;
-}
-
 interface QuickQuestion {
   id: string;
   text: string;
@@ -25,7 +20,7 @@ const HealthConsultationChat: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome-message",
-      text: "Hello! I'm your pregnancy health assistant. How can I help you today?",
+      text: "Hello! I'm your child health assistant. How can I help you today?",
       sender: "ai",
       timestamp: new Date(),
     },
@@ -39,10 +34,10 @@ const HealthConsultationChat: React.FC = () => {
   const api = useAxios();
 
   const quickQuestions: QuickQuestion[] = [
-    { id: "q1", text: "What foods should I avoid during pregnancy?" },
-    { id: "q2", text: "How can I manage morning sickness?" },
-    { id: "q3", text: "When should I contact my doctor immediately?" },
-    { id: "q4", text: "What exercise is safe during pregnancy?" },
+    { id: "q1", text: "What foods should I avoid for my child?" },
+    { id: "q2", text: "How can I manage my child's morning sickness?" },
+    { id: "q3", text: "When should I contact my child's doctor immediately?" },
+    { id: "q4", text: "What exercise is safe for my child?" },
   ];
 
   useEffect(() => {
@@ -62,7 +57,7 @@ const HealthConsultationChat: React.FC = () => {
 
     // Add user message to the chat
     const newUserMessage: Message = {
-      id: generateUniqueId('user'),
+      id: generateUniqueId("user"),
       text: inputMessage,
       sender: "user",
       timestamp: new Date(),
@@ -74,17 +69,11 @@ const HealthConsultationChat: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const result = await api.post("/ai/", { 
-        message: currentMessage, 
-        type: "Pregnancy" 
-      });
-      
-      const responseText = typeof result.data === 'object' && result.data.response 
-        ? result.data.response 
-        : String(result.data);
+      const result = await api.post("/ai/", { message: currentMessage, type: "Consultation" });
+      const responseText = typeof result.data === "object" && result.data.response ? result.data.response : String(result.data);
 
       const aiMessage: Message = {
-        id: generateUniqueId('ai'),
+        id: generateUniqueId("ai"),
         text: responseText,
         sender: "ai",
         timestamp: new Date(),
@@ -93,9 +82,8 @@ const HealthConsultationChat: React.FC = () => {
       setMessages((prev) => [...prev, aiMessage]);
     } catch (error) {
       console.error("Error sending message:", error);
-      // Optionally add error handling message to the chat
       const errorMessage: Message = {
-        id: generateUniqueId('error'),
+        id: generateUniqueId("error"),
         text: "Sorry, I couldn't process your request. Please try again.",
         sender: "ai",
         timestamp: new Date(),
@@ -131,11 +119,9 @@ const HealthConsultationChat: React.FC = () => {
           </div>
           <div>
             <h1 className="font-semibold text-base text-blue-700">
-              Maternal Health Assistant
+              Child Care Assistant
             </h1>
-            <p className="text-xs text-blue-700">
-              Online | Hospital AI Support
-            </p>
+            <p className="text-xs text-blue-700">Online | Pediatric AI Support</p>
           </div>
         </div>
       </div>
@@ -173,20 +159,14 @@ const HealthConsultationChat: React.FC = () => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
-              className={`flex mb-2 ${
-                message.sender === "user" ? "justify-end" : "justify-start"
-              }`}
+              className={`flex mb-2 ${message.sender === "user" ? "justify-end" : "justify-start"}`}
             >
               <div
-                className={`flex max-w-xs md:max-w-md ${
-                  message.sender === "user" ? "flex-row-reverse" : "flex-row"
-                }`}
+                className={`flex max-w-xs md:max-w-md ${message.sender === "user" ? "flex-row-reverse" : "flex-row"}`}
               >
                 <div
                   className={`flex-shrink-0 h-6 w-6 rounded-full flex items-center justify-center ${
-                    message.sender === "user"
-                      ? "bg-blue-100 ml-1"
-                      : "bg-blue-100 mr-1"
+                    message.sender === "user" ? "bg-blue-100 ml-1" : "bg-blue-100 mr-1"
                   }`}
                 >
                   {message.sender === "user" ? (
@@ -268,7 +248,7 @@ const HealthConsultationChat: React.FC = () => {
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Type your health question here..."
+            placeholder="Type your child health question here..."
             className="flex-1 bg-transparent outline-none text-gray-700 text-sm"
             disabled={isLoading || isTyping}
           />
@@ -291,8 +271,7 @@ const HealthConsultationChat: React.FC = () => {
           </button>
         </div>
         <p className="text-center text-xs text-gray-500 mt-1">
-          This is an AI assistant. For medical emergencies, call your healthcare
-          provider.
+          This is an AI assistant. For medical emergencies, call your healthcare provider.
         </p>
       </div>
     </div>
