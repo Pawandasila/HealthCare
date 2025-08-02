@@ -178,7 +178,7 @@ const GetHealthInfoPage = ({getUserInfo}: GetHealthProps) => {
       y: 0,
       opacity: 1,
       transition: {
-        type: "spring",
+        type: "spring" as const,
         stiffness: 300,
         damping: 24,
       },
@@ -191,7 +191,7 @@ const GetHealthInfoPage = ({getUserInfo}: GetHealthProps) => {
       scale: 1,
       opacity: 1,
       transition: {
-        type: "spring",
+        type: "spring" as const,
         stiffness: 500,
         damping: 25,
       },
@@ -209,7 +209,7 @@ const GetHealthInfoPage = ({getUserInfo}: GetHealthProps) => {
     <div className="container mx-auto py-8 px-4">
       <div className="max-w-3xl mx-auto bg-card rounded-lg shadow-lg p-6">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold mb-2">Patient Health Information</h1>
+          <h1 className="text-3xl font-bold mb-2 text-foreground">Patient Health Information</h1>
           <p className="text-muted-foreground">
             Please fill in the patient details and health conditions
           </p>
@@ -334,7 +334,7 @@ const GetHealthInfoPage = ({getUserInfo}: GetHealthProps) => {
                 <MotionCard
                   initial={{ x: -20, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 24 }}
+                  transition={{ type: "spring" as const, stiffness: 300, damping: 24 }}
                 >
                   <CardContent className="pt-6">
                     <div className="space-y-3">
@@ -396,7 +396,7 @@ const GetHealthInfoPage = ({getUserInfo}: GetHealthProps) => {
                   initial={{ x: -20, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
                   transition={{
-                    type: "spring",
+                    type: "spring" as const,
                     stiffness: 300,
                     damping: 24,
                     delay: 0.1,
@@ -462,7 +462,7 @@ const GetHealthInfoPage = ({getUserInfo}: GetHealthProps) => {
                   initial={{ x: -20, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
                   transition={{
-                    type: "spring",
+                    type: "spring" as const,
                     stiffness: 300,
                     damping: 24,
                     delay: 0.2,
@@ -531,7 +531,7 @@ const GetHealthInfoPage = ({getUserInfo}: GetHealthProps) => {
                   initial={{ x: -20, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
                   transition={{
-                    type: "spring",
+                    type: "spring" as const,
                     stiffness: 300,
                     damping: 24,
                     delay: 0.3,

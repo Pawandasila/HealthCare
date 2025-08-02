@@ -63,12 +63,12 @@ const HealthcareAIChat: React.FC<HealthcareAIChatProps> = ({
   const [isAtBottom, setIsAtBottom] = useState<boolean>(true);
   const [showScrollButton, setShowScrollButton] = useState<boolean>(false);
 
-  const quickQuestions = React.useMemo(() => [
+  const quickQuestions = [
     { id: "q1", text: "What foods should I avoid while on medication?" },
-    { id: "q2", text: "How can I manage side effects from my prescriptions?" },
+    { id: "q2", text: "What can I manage side effects from my prescriptions?" },
     { id: "q3", text: "When should I contact my doctor immediately?" },
     { id: "q4", text: "What exercise is safe with my condition?" },
-  ], []);
+  ];
 
   const { scrollYProgress } = useScroll({
     container: scrollContainerRef,
@@ -172,15 +172,6 @@ const HealthcareAIChat: React.FC<HealthcareAIChatProps> = ({
     }
   }, []);
 
-  const isNewDay = useCallback((index: number): boolean => {
-    if (index === 0) return true;
-
-    const currentDate = new Date(messages[index].timestamp).toDateString();
-    const prevDate = new Date(messages[index - 1].timestamp).toDateString();
-
-    return currentDate !== prevDate;
-  }, [messages]);
-
   const generateUniqueId = useCallback((prefix: string): string => {
     return `${prefix}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }, []);
@@ -280,11 +271,11 @@ const HealthcareAIChat: React.FC<HealthcareAIChatProps> = ({
   const getStatusIcon = useCallback((status: Message["status"]) => {
     switch (status) {
       case "sent":
-        return <Check className="w-3 h-3 text-gray-400" />;
+        return <Check className="w-3 h-3 text-muted-foreground" />;
       case "delivered":
-        return <CheckCheck className="w-3 h-3 text-gray-400" />;
+        return <CheckCheck className="w-3 h-3 text-muted-foreground" />;
       case "read":
-        return <CheckCheck className="w-3 h-3 text-blue-500" />;
+        return <CheckCheck className="w-3 h-3 text-primary" />;
       default:
         return null;
     }
@@ -318,12 +309,19 @@ const HealthcareAIChat: React.FC<HealthcareAIChatProps> = ({
 
   const MessageComponent = React.memo(
     ({ message, index }: { message: Message; index: number }) => {
+      const isNewDayForMessage = React.useMemo(() => {
+        if (index === 0) return true;
+        const currentDate = new Date(message.timestamp).toDateString();
+        const prevDate = new Date(messages[index - 1].timestamp).toDateString();
+        return currentDate !== prevDate;
+      }, [message.timestamp, index]);
+
       return (
         <React.Fragment>
           {/* Date divider */}
-          {index > 0 && isNewDay(index) && (
+          {index > 0 && isNewDayForMessage && (
             <div className="flex justify-center my-2">
-              <div className="px-3 py-1 bg-gray-200 rounded-full text-xs text-gray-600">
+              <div className="px-3 py-1 bg-muted rounded-full text-xs text-muted-foreground">
                 {formatMessageDate(message.timestamp)}
               </div>
             </div>
@@ -354,13 +352,13 @@ const HealthcareAIChat: React.FC<HealthcareAIChatProps> = ({
                       className="w-8 h-8 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                      <Bot className="w-4 h-4 text-blue-600" />
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Bot className="w-4 h-4 text-primary" />
                     </div>
                   )}
                   {message.isAI && (
-                    <div className="absolute -bottom-1 -right-1 bg-blue-400 rounded-full w-3 h-3 border border-white flex items-center justify-center">
-                      <Sparkles className="w-2 h-2 text-white" />
+                    <div className="absolute -bottom-1 -right-1 bg-primary/80 rounded-full w-3 h-3 border border-background flex items-center justify-center">
+                      <Sparkles className="w-2 h-2 text-primary-foreground" />
                     </div>
                   )}
                 </div>
@@ -368,18 +366,18 @@ const HealthcareAIChat: React.FC<HealthcareAIChatProps> = ({
 
               {!message.isProvider && (
                 <div className="mt-1 ml-2">
-                  <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                    <User className="w-4 h-4 text-blue-600" />
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                    <User className="w-4 h-4 text-primary" />
                   </div>
                 </div>
               )}
 
               <div>
                 {message.isProvider && (
-                  <div className="text-xs text-gray-600 ml-1 mb-1 flex items-center">
+                  <div className="text-xs text-muted-foreground ml-1 mb-1 flex items-center">
                     {message.sender}
                     {message.isAI && (
-                      <span className="ml-1 bg-blue-100 text-blue-600 text-xs px-1 rounded-sm">
+                      <span className="ml-1 bg-primary/10 text-primary text-xs px-1 rounded-sm">
                         AI
                       </span>
                     )}
@@ -389,15 +387,15 @@ const HealthcareAIChat: React.FC<HealthcareAIChatProps> = ({
                 <div
                   className={`rounded-lg p-3 break-words ${
                     message.isProvider
-                      ? "bg-white border border-gray-200 text-gray-800"
-                      : "bg-blue-500 text-white"
+                      ? "bg-card border border-border text-foreground"
+                      : "bg-primary text-primary-foreground"
                   }`}
                 >
                   <p className="text-sm">{message.content}</p>
                 </div>
 
                 <div
-                  className={`flex mt-1 text-xs text-gray-500 ${
+                  className={`flex mt-1 text-xs text-muted-foreground ${
                     message.isProvider
                       ? "justify-start ml-1"
                       : "justify-end mr-1"
@@ -418,14 +416,15 @@ const HealthcareAIChat: React.FC<HealthcareAIChatProps> = ({
     }, 
     (prevProps, nextProps) => {
       return prevProps.message.id === nextProps.message.id && 
-             prevProps.message.status === nextProps.message.status;
+             prevProps.message.status === nextProps.message.status &&
+             prevProps.index === nextProps.index;
     }
   );
 
   MessageComponent.displayName = "MessageComponent";
 
   return (
-    <div className="bg-gray-50 flex flex-col h-full max-h-screen">
+    <div className="bg-background flex flex-col h-full max-h-screen">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -433,24 +432,24 @@ const HealthcareAIChat: React.FC<HealthcareAIChatProps> = ({
       >
         {/* Header */}
         <motion.div
-          className="px-4 py-3 border-b border-gray-200 bg-gradient-to-l from-blue-200 to-blue-300 flex items-center justify-between sticky top-0 shadow-sm"
+          className="px-4 py-3 border-b border-border bg-gradient-to-l from-primary/20 to-primary/30 flex items-center justify-between sticky top-0 shadow-sm"
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.3 }}
         >
           <div className="flex items-center">
-            <button className="p-1 mr-2 rounded-full hover:bg-blue-100 text-blue-600">
+            <button className="p-1 mr-2 rounded-full hover:bg-accent text-primary">
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div className="flex items-center">
               <div className="relative">
-                <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center border-2 border-blue-100">
-                  <Bot className="w-5 h-5 text-blue-600" />
+                <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center border-2 border-primary/20">
+                  <Bot className="w-5 h-5 text-primary" />
                 </div>
-                <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border border-white"></div>
+                <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border border-background"></div>
               </div>
               <div className="ml-2">
-                <h2 className="font-medium text-sm text-blue-700">
+                <h2 className="font-medium text-sm text-foreground">
                   Healthcare AI Assistant
                 </h2>
                 <p className="text-xs text-green-600">
@@ -460,21 +459,21 @@ const HealthcareAIChat: React.FC<HealthcareAIChatProps> = ({
             </div>
           </div>
           <div className="flex items-center space-x-3">
-            <button className="p-1.5 rounded-full hover:bg-blue-100 text-blue-600">
+            <button className="p-1.5 rounded-full hover:bg-accent text-primary">
               <Phone className="w-5 h-5" />
             </button>
-            <button className="p-1.5 rounded-full hover:bg-blue-100 text-blue-600">
+            <button className="p-1.5 rounded-full hover:bg-accent text-primary">
               <Video className="w-5 h-5" />
             </button>
-            <button className="p-1.5 rounded-full hover:bg-blue-100 text-blue-600">
+            <button className="p-1.5 rounded-full hover:bg-accent text-primary">
               <MoreVertical className="w-5 h-5" />
             </button>
           </div>
         </motion.div>
 
         {/* Quick questions section */}
-        <div className="bg-white p-2 border-b border-blue-200">
-          <p className="text-xs text-blue-600 mb-1 flex items-center">
+        {/* <div className="bg-card p-2 border-b border-primary/20">
+          <p className="text-xs text-primary mb-1 flex items-center">
             <Sparkles className="h-3 w-3 mr-1" />
             Suggested Questions
           </p>
@@ -482,19 +481,19 @@ const HealthcareAIChat: React.FC<HealthcareAIChatProps> = ({
             {quickQuestions.map((q) => (
               <button
                 key={q.id}
-                className="bg-blue-50 text-blue-600 px-2 py-1 rounded-full text-xs border border-blue-100 hover:bg-blue-100 cursor-pointer"
+                className="bg-primary/10 text-primary px-2 py-1 rounded-full text-xs border border-primary/20 hover:bg-primary/20 cursor-pointer"
                 onClick={() => handleQuickQuestion(q.text)}
               >
                 {q.text}
               </button>
             ))}
           </div>
-        </div>
+        </div> */}
 
         {/* Messages area */}
         <motion.div
           ref={scrollContainerRef}
-          className="flex-1 overflow-y-auto px-4 py-3 bg-gray-50 relative"
+          className="flex-1 overflow-y-auto px-4 py-3 bg-background relative custom-scrollbar"
           style={{ maxHeight }}
           variants={containerVariants}
           initial="hidden"
@@ -502,7 +501,7 @@ const HealthcareAIChat: React.FC<HealthcareAIChatProps> = ({
         >
           {showDateDivider && messages.length > 0 && (
             <div className="flex justify-center my-2">
-              <div className="px-3 py-1 bg-gray-200 rounded-full text-xs text-gray-600">
+              <div className="px-3 py-1 bg-muted rounded-full text-xs text-muted-foreground">
                 {formatMessageDate(messages[0].timestamp)}
               </div>
             </div>
@@ -529,17 +528,17 @@ const HealthcareAIChat: React.FC<HealthcareAIChatProps> = ({
               >
                 <div className="flex items-end">
                   <div className="relative mr-2">
-                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                      <Bot className="w-4 h-4 text-blue-600" />
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Bot className="w-4 h-4 text-primary" />
                     </div>
-                    <div className="absolute -bottom-1 -right-1 bg-blue-400 rounded-full w-3 h-3 border border-white flex items-center justify-center">
-                      <Sparkles className="w-2 h-2 text-white" />
+                    <div className="absolute -bottom-1 -right-1 bg-primary/80 rounded-full w-3 h-3 border border-background flex items-center justify-center">
+                      <Sparkles className="w-2 h-2 text-primary-foreground" />
                     </div>
                   </div>
-                  <div className="bg-white border border-gray-200 rounded-lg px-3 py-2">
+                  <div className="bg-card border border-border rounded-lg px-3 py-2">
                     <div className="flex space-x-1">
                       <motion.div
-                        className="w-2 h-2 bg-blue-400 rounded-full"
+                        className="w-2 h-2 bg-primary/60 rounded-full"
                         animate={{ y: [0, -5, 0] }}
                         transition={{
                           duration: 0.8,
@@ -549,7 +548,7 @@ const HealthcareAIChat: React.FC<HealthcareAIChatProps> = ({
                         }}
                       />
                       <motion.div
-                        className="w-2 h-2 bg-blue-500 rounded-full"
+                        className="w-2 h-2 bg-primary/80 rounded-full"
                         animate={{ y: [0, -5, 0] }}
                         transition={{
                           duration: 0.8,
@@ -559,7 +558,7 @@ const HealthcareAIChat: React.FC<HealthcareAIChatProps> = ({
                         }}
                       />
                       <motion.div
-                        className="w-2 h-2 bg-blue-600 rounded-full"
+                        className="w-2 h-2 bg-primary rounded-full"
                         animate={{ y: [0, -5, 0] }}
                         transition={{
                           duration: 0.8,
@@ -580,7 +579,7 @@ const HealthcareAIChat: React.FC<HealthcareAIChatProps> = ({
             {showScrollButton && (
               <motion.button
                 id="scroll-bottom-button"
-                className="absolute bottom-4 right-4 bg-blue-500 text-white rounded-full p-2 shadow-lg"
+                className="absolute bottom-4 right-4 bg-primary text-primary-foreground rounded-full p-2 shadow-lg"
                 onClick={() => scrollToBottom()}
                 variants={scrollButtonVariants}
                 initial="hidden"
@@ -611,7 +610,7 @@ const HealthcareAIChat: React.FC<HealthcareAIChatProps> = ({
 
           {/* Scroll progress indicator */}
           <motion.div
-            className="h-1 bg-blue-500 absolute top-0 left-0"
+            className="h-1 bg-primary absolute top-0 left-0"
             style={{
               scaleX: scrollYProgress,
               transformOrigin: "left",
@@ -621,13 +620,13 @@ const HealthcareAIChat: React.FC<HealthcareAIChatProps> = ({
 
         {/* Input area */}
         <motion.div
-          className="p-3 border-t border-gray-200 bg-white"
+          className="p-3 border-t border-border bg-card"
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.3, delay: 0.2 }}
         >
-          <div className="flex items-center bg-blue-50 rounded-full px-3 py-1 border border-blue-100">
-            <button className="p-1 mr-1 text-blue-500 hover:text-blue-700">
+          <div className="flex items-center bg-muted rounded-full px-3 py-1 border border-border">
+            <button className="p-1 mr-1 text-primary hover:text-primary/80">
               <Paperclip className="w-5 h-5" />
             </button>
             <input
@@ -643,8 +642,8 @@ const HealthcareAIChat: React.FC<HealthcareAIChatProps> = ({
             <motion.button
               className={`p-1.5 rounded-full ${
                 newMessage.trim() && !isLoading
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-300 text-gray-500"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted-foreground/20 text-muted-foreground"
               }`}
               onClick={handleSendMessage}
               disabled={!newMessage.trim() || isLoading}
@@ -658,7 +657,7 @@ const HealthcareAIChat: React.FC<HealthcareAIChatProps> = ({
               )}
             </motion.button>
           </div>
-          <div className="text-xs text-center mt-2 text-gray-500">
+          <div className="text-xs text-center mt-2 text-muted-foreground">
             <span>
               This is an AI assistant. For medical emergencies, call your
               healthcare provider.

@@ -110,24 +110,24 @@ const HealthConsultationChat: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-[92vh] overflow-hidden bg-blue-50">
-      <div className="bg-gradient-to-l from-blue-200 to-blue-300 shadow-md p-4 flex items-center justify-between ">
+    <div className="flex flex-col h-[92vh] overflow-hidden bg-background/10">
+      <div className="bg-primary shadow-md p-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="relative h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
-            <Bot className="h-5 w-5 text-blue-600" />
+          <div className="relative h-8 w-8 rounded-full bg-primary-foreground/10 flex items-center justify-center">
+            <Bot className="h-5 w-5 text-primary-foreground" />
             <span className="absolute -top-1 -right-1 h-3 w-3 bg-green-500 rounded-full" />
           </div>
           <div>
-            <h1 className="font-semibold text-base text-blue-700">
+            <h1 className="font-semibold text-base text-primary-foreground">
               Child Care Assistant
             </h1>
-            <p className="text-xs text-blue-700">Online | Pediatric AI Support</p>
+            <p className="text-xs text-primary-foreground/80">Online | Pediatric AI Support</p>
           </div>
         </div>
       </div>
 
-      <div className="bg-white p-2 border-b border-blue-200">
-        <p className="text-xs text-blue-600 mb-1 flex items-center">
+      <div className="bg-card p-2 border-b border-border">
+        <p className="text-xs text-muted-foreground mb-1 flex items-center">
           <Sparkles className="h-3 w-3 mr-1" />
           Suggested Questions
         </p>
@@ -135,7 +135,7 @@ const HealthConsultationChat: React.FC = () => {
           {quickQuestions.map((q) => (
             <button
               key={q.id}
-              className="bg-blue-50 text-blue-600 px-2 py-1 rounded-full text-xs border border-blue-100 hover:bg-blue-100 cursor-pointer"
+              className="bg-accent text-accent-foreground px-2 py-1 rounded-full text-xs border border-border hover:bg-accent/80 cursor-pointer transition-colors"
               onClick={() => handleQuickQuestion(q.text)}
             >
               {q.text}
@@ -146,10 +146,10 @@ const HealthConsultationChat: React.FC = () => {
 
       <div
         ref={chatContainerRef}
-        className="flex-1 p-2 overflow-y-auto bg-white"
+        className="flex-1 p-2 overflow-y-auto custom-scrollbar modal-scroll-container bg-card"
         style={{
-          height: "calc(100vh - 200px)",
-          maxHeight: "calc(100vh - 200px)",
+          height: "calc(100vh - 180px)",
+          maxHeight: "calc(100vh - 180px)",
         }}
       >
         <AnimatePresence>
@@ -166,21 +166,21 @@ const HealthConsultationChat: React.FC = () => {
               >
                 <div
                   className={`flex-shrink-0 h-6 w-6 rounded-full flex items-center justify-center ${
-                    message.sender === "user" ? "bg-blue-100 ml-1" : "bg-blue-100 mr-1"
+                    message.sender === "user" ? "bg-primary/10 ml-1" : "bg-accent mr-1"
                   }`}
                 >
                   {message.sender === "user" ? (
-                    <User className="h-3 w-3 text-blue-600" />
+                    <User className="h-3 w-3 text-primary" />
                   ) : (
-                    <Bot className="h-3 w-3 text-blue-600" />
+                    <Bot className="h-3 w-3 text-accent-foreground" />
                   )}
                 </div>
                 <div>
                   <div
                     className={`p-2 rounded-lg text-sm ${
                       message.sender === "user"
-                        ? "bg-blue-500 text-white rounded-tr-none"
-                        : "bg-gray-100 text-gray-800 rounded-tl-none"
+                        ? "bg-primary text-primary-foreground rounded-tr-none"
+                        : "bg-muted text-muted-foreground rounded-tl-none"
                     }`}
                   >
                     <p>{message.text}</p>
@@ -188,7 +188,7 @@ const HealthConsultationChat: React.FC = () => {
                   <p
                     className={`text-xs mt-1 ${
                       message.sender === "user" ? "text-right" : ""
-                    } text-gray-500`}
+                    } text-muted-foreground`}
                   >
                     {formatTime(message.timestamp)}
                   </p>
@@ -200,11 +200,11 @@ const HealthConsultationChat: React.FC = () => {
           {isLoading && (
             <div key="loading-indicator" className="flex mb-2 justify-start">
               <div className="flex max-w-xs md:max-w-md flex-row">
-                <div className="flex-shrink-0 h-6 w-6 rounded-full bg-blue-100 mr-1 flex items-center justify-center">
-                  <Bot className="h-3 w-3 text-blue-600" />
+                <div className="flex-shrink-0 h-6 w-6 rounded-full bg-accent mr-1 flex items-center justify-center">
+                  <Bot className="h-3 w-3 text-accent-foreground" />
                 </div>
-                <div className="p-2 rounded-lg bg-gray-100 rounded-tl-none">
-                  <Loader2 className="h-4 w-4 text-blue-500 animate-spin" />
+                <div className="p-2 rounded-lg bg-muted rounded-tl-none">
+                  <Loader2 className="h-4 w-4 text-primary animate-spin" />
                 </div>
               </div>
             </div>
@@ -213,21 +213,21 @@ const HealthConsultationChat: React.FC = () => {
           {isTyping && (
             <div key="typing-indicator" className="flex mb-2 justify-start">
               <div className="flex max-w-xs md:max-w-md flex-row">
-                <div className="flex-shrink-0 h-6 w-6 rounded-full bg-blue-100 mr-1 flex items-center justify-center">
-                  <Bot className="h-3 w-3 text-blue-600" />
+                <div className="flex-shrink-0 h-6 w-6 rounded-full bg-accent mr-1 flex items-center justify-center">
+                  <Bot className="h-3 w-3 text-accent-foreground" />
                 </div>
-                <div className="p-2 rounded-lg bg-gray-100 rounded-tl-none flex items-center">
+                <div className="p-2 rounded-lg bg-muted rounded-tl-none flex items-center">
                   <div className="flex space-x-1">
                     <div
-                      className="h-1.5 w-1.5 bg-blue-400 rounded-full animate-bounce"
+                      className="h-1.5 w-1.5 bg-primary/60 rounded-full animate-bounce"
                       style={{ animationDelay: "0ms" }}
                     />
                     <div
-                      className="h-1.5 w-1.5 bg-blue-500 rounded-full animate-bounce"
+                      className="h-1.5 w-1.5 bg-primary/80 rounded-full animate-bounce"
                       style={{ animationDelay: "150ms" }}
                     />
                     <div
-                      className="h-1.5 w-1.5 bg-blue-600 rounded-full animate-bounce"
+                      className="h-1.5 w-1.5 bg-primary rounded-full animate-bounce"
                       style={{ animationDelay: "300ms" }}
                     />
                   </div>
@@ -240,8 +240,8 @@ const HealthConsultationChat: React.FC = () => {
       </div>
 
       {/* Input area */}
-      <div className="p-3 bg-white border-t border-blue-100">
-        <div className="flex items-center bg-blue-50 rounded-full overflow-hidden pl-3 pr-1 py-2 border border-blue-100">
+      <div className="p-3 bg-card border-t border-border">
+        <div className="flex items-center bg-background rounded-full overflow-hidden pl-3 pr-3 py-2 border border-input">
           <input
             ref={inputRef}
             type="text"
@@ -249,28 +249,24 @@ const HealthConsultationChat: React.FC = () => {
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Type your child health question here..."
-            className="flex-1 bg-transparent outline-none text-gray-700 text-sm"
+            className="flex-1 bg-transparent outline-none text-foreground text-sm placeholder:text-muted-foreground"
             disabled={isLoading || isTyping}
           />
           <button
-            className={`p-1.5 rounded-full ${
+            className={`p-1.5 rounded-full transition-colors ${
               inputMessage.trim() && !isLoading && !isTyping
-                ? "bg-blue-500 hover:bg-blue-600"
-                : "bg-gray-300"
+                ? "bg-primary hover:bg-primary/90 text-primary-foreground"
+                : "bg-muted text-muted-foreground cursor-not-allowed"
             }`}
             onClick={handleSendMessage}
             disabled={!inputMessage.trim() || isLoading || isTyping}
           >
             <Send
-              className={`h-4 w-4 ${
-                inputMessage.trim() && !isLoading && !isTyping
-                  ? "text-white"
-                  : "text-gray-500"
-              }`}
+              className="h-4 w-4"
             />
           </button>
         </div>
-        <p className="text-center text-xs text-gray-500 mt-1">
+        <p className="text-center text-xs text-muted-foreground mt-1">
           This is an AI assistant. For medical emergencies, call your healthcare provider.
         </p>
       </div>

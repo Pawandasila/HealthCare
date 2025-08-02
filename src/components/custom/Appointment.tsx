@@ -192,11 +192,13 @@ const AppointmentsSection: React.FC = () => {
       variants={fadeInUp}
       transition={{ delay: 0.3 }}
     >
-      <Card className="shadow-md">
-        <CardHeader className="flex flex-row items-center justify-between">
+      <Card className="border-border bg-card/95 backdrop-blur-xl shadow-2xl overflow-hidden relative">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/60 via-primary/70 to-primary/80"></div>
+        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary/8 to-transparent rounded-full -translate-y-16 translate-x-16"></div>
+        <CardHeader className="flex flex-row items-center justify-between relative z-10">
           <div>
-            <CardTitle className="text-xl font-bold">Appointments</CardTitle>
-            <CardDescription className="text-gray-500">
+            <CardTitle className="text-xl font-bold text-card-foreground">Appointments</CardTitle>
+            <CardDescription className="text-muted-foreground">
               View your upcoming and past appointments
             </CardDescription>
           </div>
@@ -204,39 +206,43 @@ const AppointmentsSection: React.FC = () => {
             onClick={() => setIsModalOpen(true)}
             whileHover={buttonVariants.hover}
             whileTap={buttonVariants.tap}
-            className="bg-blue-600 hover:bg-blue-700"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground border-0 shadow-lg hover:shadow-primary/25"
           >
             <Plus className="w-4 h-4 mr-2" />
             Add Appointment
           </MotionButton>
         </CardHeader>
-        <CardContent>
+        <CardContent className="relative z-10">
           <Tabs defaultValue="upcoming">
-            <TabsList className="mb-4 bg-gray-100 p-1 rounded-lg">
-              <TabsTrigger value="upcoming" className="rounded-md">
+            <TabsList className="mb-4 bg-muted p-1 rounded-lg border border-border">
+              <TabsTrigger
+                value="upcoming"
+                className="rounded-md text-muted-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg"
+              >
                 Upcoming
               </TabsTrigger>
-              <TabsTrigger value="past" className="rounded-md">
+              <TabsTrigger
+                value="past"
+                className="rounded-md text-muted-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg"
+              >
                 Past Visits
               </TabsTrigger>
-            </TabsList>
-
-            <AnimatePresence mode="wait">
+            </TabsList>            <AnimatePresence mode="wait">
               <TabsContent value="upcoming">
-                <div className="overflow-x-auto rounded-lg border">
+                <div className="overflow-x-auto rounded-lg border border-border bg-muted/50">
                   <Table>
-                    <TableHeader className="bg-gray-50">
-                      <TableRow>
-                        <TableHead className="font-semibold">Doctor</TableHead>
-                        <TableHead className="font-semibold">
+                    <TableHeader className="bg-secondary">
+                      <TableRow className="border-b border-border">
+                        <TableHead className="font-semibold text-secondary-foreground">Doctor</TableHead>
+                        <TableHead className="font-semibold text-secondary-foreground">
                           Specialty
                         </TableHead>
-                        <TableHead className="font-semibold">Date</TableHead>
-                        <TableHead className="font-semibold">Time</TableHead>
-                        <TableHead className="font-semibold">
+                        <TableHead className="font-semibold text-secondary-foreground">Date</TableHead>
+                        <TableHead className="font-semibold text-secondary-foreground">Time</TableHead>
+                        <TableHead className="font-semibold text-secondary-foreground">
                           Location
                         </TableHead>
-                        <TableHead className="font-semibold">Actions</TableHead>
+                        <TableHead className="font-semibold text-secondary-foreground">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -248,22 +254,22 @@ const AppointmentsSection: React.FC = () => {
                           animate="visible"
                           whileHover="hover"
                           variants={rowVariants}
-                          className="cursor-pointer"
+                          className="cursor-pointer border-b border-border hover:bg-muted/50 transition-colors"
                         >
-                          <TableCell className="font-medium">
+                          <TableCell className="font-medium text-card-foreground">
                             {appointment.doctorName}
                           </TableCell>
-                          <TableCell>{appointment.specialty}</TableCell>
-                          <TableCell>{appointment.date}</TableCell>
-                          <TableCell>{appointment.time}</TableCell>
-                          <TableCell>{appointment.location}</TableCell>
+                          <TableCell className="text-muted-foreground">{appointment.specialty}</TableCell>
+                          <TableCell className="text-muted-foreground">{appointment.date}</TableCell>
+                          <TableCell className="text-muted-foreground">{appointment.time}</TableCell>
+                          <TableCell className="text-muted-foreground">{appointment.location}</TableCell>
                           <TableCell>
                             <MotionButton
                               variant="outline"
                               size="sm"
                               whileHover={buttonVariants.hover}
                               whileTap={buttonVariants.tap}
-                              className="text-blue-600 border-blue-600"
+                              className="text-primary border-primary/50 hover:bg-primary/20 hover:border-primary transition-all"
                             >
                               <Calendar className="w-4 h-4 mr-2" />
                               Reschedule
@@ -277,19 +283,19 @@ const AppointmentsSection: React.FC = () => {
               </TabsContent>
 
               <TabsContent value="past">
-                <div className="overflow-x-auto rounded-lg border">
+                <div className="overflow-x-auto rounded-lg border border-slate-700/50 dark:border-slate-600/50 bg-slate-900/50 dark:bg-slate-800/50">
                   <Table>
-                    <TableHeader className="bg-gray-50">
-                      <TableRow>
-                        <TableHead className="font-semibold">Date</TableHead>
-                        <TableHead className="font-semibold">Doctor</TableHead>
-                        <TableHead className="font-semibold">
+                    <TableHeader className="bg-slate-800/70 dark:bg-slate-700/70">
+                      <TableRow className="border-b border-slate-700/50 dark:border-slate-600/50">
+                        <TableHead className="font-semibold text-slate-200 dark:text-slate-300">Date</TableHead>
+                        <TableHead className="font-semibold text-slate-200 dark:text-slate-300">Doctor</TableHead>
+                        <TableHead className="font-semibold text-slate-200 dark:text-slate-300">
                           Specialty
                         </TableHead>
-                        <TableHead className="font-semibold">
+                        <TableHead className="font-semibold text-slate-200 dark:text-slate-300">
                           Diagnosis
                         </TableHead>
-                        <TableHead className="font-semibold">Report</TableHead>
+                        <TableHead className="font-semibold text-slate-200 dark:text-slate-300">Report</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -301,14 +307,14 @@ const AppointmentsSection: React.FC = () => {
                           animate="visible"
                           whileHover="hover"
                           variants={rowVariants}
-                          className="cursor-pointer"
+                          className="cursor-pointer border-b border-slate-700/30 dark:border-slate-600/30 hover:bg-slate-800/50 dark:hover:bg-slate-700/50 transition-colors"
                         >
-                          <TableCell className="font-medium">
+                          <TableCell className="font-medium text-white dark:text-slate-100">
                             {appointment.date}
                           </TableCell>
-                          <TableCell>{appointment.doctorName}</TableCell>
-                          <TableCell>{appointment.specialty}</TableCell>
-                          <TableCell>{appointment.diagnosis}</TableCell>
+                          <TableCell className="text-slate-300 dark:text-slate-400">{appointment.doctorName}</TableCell>
+                          <TableCell className="text-slate-300 dark:text-slate-400">{appointment.specialty}</TableCell>
+                          <TableCell className="text-slate-300 dark:text-slate-400">{appointment.diagnosis}</TableCell>
                           <TableCell>
                             {appointment.hasReport && appointment.reportId && (
                               <MotionButton
@@ -319,7 +325,7 @@ const AppointmentsSection: React.FC = () => {
                                 }
                                 whileHover={buttonVariants.hover}
                                 whileTap={buttonVariants.tap}
-                                className="text-green-600"
+                                className="text-emerald-400 hover:bg-emerald-500/20 transition-all"
                               >
                                 <motion.div
                                   animate={{ y: [0, -3, 0] }}

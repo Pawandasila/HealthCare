@@ -27,6 +27,11 @@ const SOSButton: React.FC = () => {
   const [isSending, setIsSending] = useState<boolean>(false);
   const [isSent, setIsSent] = useState<boolean>(false);
   
+  // Prevent scroll propagation to background
+  const handleScrollableAreaWheel = (e: React.WheelEvent) => {
+    e.stopPropagation();
+  };
+  
   const nearbyHospitals: HospitalInfo[] = [
     {
       name: "City General Hospital",
@@ -84,7 +89,7 @@ const SOSButton: React.FC = () => {
         >
           <Button
             onClick={() => setIsModalOpen(true)}
-            className="h-16 w-16 rounded-full bg-red-600 hover:bg-red-700 text-white font-bold text-lg shadow-lg"
+            className="h-16 w-16 rounded-full bg-destructive hover:bg-destructive/90 text-destructive-foreground font-bold text-lg shadow-lg"
             aria-label="Emergency SOS"
           >
             <motion.span
@@ -99,28 +104,36 @@ const SOSButton: React.FC = () => {
 
       {/* SOS Modal */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-[500px] max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center text-red-600 text-2xl">
+        <DialogContent 
+          className="sm:max-w-[500px] max-h-[85vh] p-0 overflow-hidden flex flex-col"
+          onWheel={handleScrollableAreaWheel}
+        >
+          <DialogHeader className="flex-shrink-0 px-6 pt-6 pb-4">
+            <DialogTitle className="flex items-center text-destructive text-2xl">
               <AlertCircle className="mr-2 h-6 w-6" />
               Emergency SOS
             </DialogTitle>
-            <DialogDescription className="text-gray-700">
+            <DialogDescription className="text-muted-foreground">
               Send an emergency alert to receive immediate assistance
             </DialogDescription>
           </DialogHeader>
 
-          <Tabs defaultValue="hospitals" className="w-full">
-            <TabsList className="grid grid-cols-2 mb-4">
-              <TabsTrigger value="hospitals">Nearby Hospitals</TabsTrigger>
-              <TabsTrigger value="contacts">Emergency Contacts</TabsTrigger>
-            </TabsList>
+          <div 
+            className="flex-1 overflow-y-auto custom-scrollbar modal-scroll-container px-6"
+            onWheel={handleScrollableAreaWheel}
+            style={{ maxHeight: 'calc(85vh - 180px)' }}
+          >
+            <Tabs defaultValue="hospitals" className="w-full">
+              <TabsList className="grid grid-cols-2 mb-4 sticky top-0 bg-background z-10">
+                <TabsTrigger value="hospitals">Nearby Hospitals</TabsTrigger>
+                <TabsTrigger value="contacts">Emergency Contacts</TabsTrigger>
+              </TabsList>
             
             <TabsContent value="hospitals" className="space-y-4">
               {nearbyHospitals.map((hospital, index) => (
                 <motion.div
                   key={index}
-                  className="border rounded-lg p-4 hover:bg-gray-50"
+                  className="border-border rounded-lg p-4 hover:bg-accent transition-colors"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
@@ -128,22 +141,22 @@ const SOSButton: React.FC = () => {
                 >
                   <div className="flex justify-between items-start">
                     <div>
-                      <h3 className="font-semibold text-lg">{hospital.name}</h3>
-                      <div className="flex items-center text-gray-600 text-sm mt-1">
+                      <h3 className="font-semibold text-lg text-card-foreground">{hospital.name}</h3>
+                      <div className="flex items-center text-muted-foreground text-sm mt-1">
                         <MapPin className="h-4 w-4 mr-1" />
                         <span>{hospital.distance} - {hospital.address}</span>
                       </div>
-                      <div className="flex items-center text-gray-600 text-sm mt-1">
+                      <div className="flex items-center text-muted-foreground text-sm mt-1">
                         <Phone className="h-4 w-4 mr-1" />
                         <span>{hospital.phone}</span>
                       </div>
-                      <div className="flex items-center text-gray-600 text-sm mt-1">
+                      <div className="flex items-center text-muted-foreground text-sm mt-1">
                         <Clock className="h-4 w-4 mr-1" />
                         <span>{hospital.openHours}</span>
                       </div>
                       <div className="mt-2">
                         {hospital.emergencyServices.map((service, i) => (
-                          <span key={i} className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mr-2 mb-1">
+                          <span key={i} className="inline-block bg-primary/10 text-primary text-xs px-2 py-1 rounded mr-2 mb-1">
                             {service}
                           </span>
                         ))}
@@ -163,17 +176,17 @@ const SOSButton: React.FC = () => {
             </TabsContent>
             
             <TabsContent value="contacts" className="space-y-4">
-              <div className="border rounded-lg p-4">
-                <h3 className="font-semibold">Emergency Services</h3>
+              <div className="border-border rounded-lg p-4 bg-card">
+                <h3 className="font-semibold text-card-foreground">Emergency Services</h3>
                 <div className="grid grid-cols-1 gap-2 mt-2">
-                  <div className="flex justify-between items-center p-2 hover:bg-gray-50 rounded">
+                  <div className="flex justify-between items-center p-2 hover:bg-accent rounded">
                     <div className="flex items-center">
-                      <div className="bg-red-100 p-2 rounded-full mr-3">
-                        <Phone className="h-5 w-5 text-red-600" />
+                      <div className="bg-destructive/10 p-2 rounded-full mr-3">
+                        <Phone className="h-5 w-5 text-destructive" />
                       </div>
                       <div>
-                        <p className="font-medium">Emergency Number</p>
-                        <p className="text-sm text-gray-600">911</p>
+                        <p className="font-medium text-card-foreground">Emergency Number</p>
+                        <p className="text-sm text-muted-foreground">911</p>
                       </div>
                     </div>
                     <Button
@@ -186,14 +199,14 @@ const SOSButton: React.FC = () => {
                     </Button>
                   </div>
                   
-                  <div className="flex justify-between items-center p-2 hover:bg-gray-50 rounded">
+                  <div className="flex justify-between items-center p-2 hover:bg-accent rounded">
                     <div className="flex items-center">
-                      <div className="bg-blue-100 p-2 rounded-full mr-3">
-                        <Phone className="h-5 w-5 text-blue-600" />
+                      <div className="bg-primary/10 p-2 rounded-full mr-3">
+                        <Phone className="h-5 w-5 text-primary" />
                       </div>
                       <div>
-                        <p className="font-medium">Poison Control</p>
-                        <p className="text-sm text-gray-600">(800) 222-1222</p>
+                        <p className="font-medium text-card-foreground">Poison Control</p>
+                        <p className="text-sm text-muted-foreground">(800) 222-1222</p>
                       </div>
                     </div>
                     <Button
@@ -206,14 +219,14 @@ const SOSButton: React.FC = () => {
                     </Button>
                   </div>
                   
-                  <div className="flex justify-between items-center p-2 hover:bg-gray-50 rounded">
+                  <div className="flex justify-between items-center p-2 hover:bg-accent rounded">
                     <div className="flex items-center">
-                      <div className="bg-green-100 p-2 rounded-full mr-3">
+                      <div className="bg-green-500/10 p-2 rounded-full mr-3">
                         <Phone className="h-5 w-5 text-green-600" />
                       </div>
                       <div>
-                        <p className="font-medium">Primary Doctor</p>
-                        <p className="text-sm text-gray-600">Dr. James Wilson - (555) 234-5678</p>
+                        <p className="font-medium text-card-foreground">Primary Doctor</p>
+                        <p className="text-sm text-muted-foreground">Dr. James Wilson - (555) 234-5678</p>
                       </div>
                     </div>
                     <Button
@@ -229,8 +242,9 @@ const SOSButton: React.FC = () => {
               </div>
             </TabsContent>
           </Tabs>
+          </div>
 
-          <DialogFooter className="flex flex-col sm:flex-row gap-2">
+          <DialogFooter className="flex flex-col sm:flex-row gap-2 flex-shrink-0 pt-4 border-t border-border px-6 pb-6">
             <Button 
               variant="outline" 
               onClick={() => setIsModalOpen(false)}
@@ -239,7 +253,7 @@ const SOSButton: React.FC = () => {
               Cancel
             </Button>
             <Button 
-              className="w-full sm:w-auto bg-red-600 hover:bg-red-700 flex items-center justify-center gap-2"
+              className="w-full sm:w-auto bg-destructive hover:bg-destructive/90 flex items-center justify-center gap-2"
               onClick={handleSendSOS}
               disabled={isSending || isSent}
             >

@@ -4,8 +4,6 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   Home,
-  BarChart2,
-  Users,
   Settings,
   LogOut,
   Menu,
@@ -15,7 +13,6 @@ import {
   ChevronDown,
   Baby,
   Activity,
-  Calendar,
   User,
   X
 } from "lucide-react";
@@ -49,12 +46,53 @@ export default function DashboardLayout({
   const [pregnancyOpen, setPregnancyOpen] = useState(false);
   const [childOpen, setChildOpen] = useState(false);
 
+  // Auto-expand collapsibles based on current route
+  useEffect(() => {
+    if (pathname.includes('/dashboard/pregnancy') || pathname.includes('/dashboard/child') || pathname.includes('/dashboard/general')) {
+      setPregnancyOpen(true);
+    }
+    if (pathname.includes('/dashboard/medication')) {
+      setChildOpen(true);
+    }
+  }, [pathname]);
+
+  // Close collapsibles when sidebar is minimized on desktop
+  useEffect(() => {
+    if (!sidebarOpen && !isMobile) {
+      setPregnancyOpen(false);
+      setChildOpen(false);
+    }
+  }, [sidebarOpen, isMobile]);
+
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
+  // Close sidebar on mobile when navigating
+  const handleNavigation = () => {
+    if (isMobile && sidebarOpen) {
+      setSidebarOpen(false);
+    }
+  };
+
   const isActive = (path: string) => {
+    // Exact match for dashboard home
+    if (path === "/dashboard") {
+      return pathname === "/dashboard";
+    }
     return pathname === path || pathname.startsWith(path + "/");
+  };
+
+  // Enhanced path matching for medication routes
+  const isMedicationActive = () => {
+    return pathname.includes('/dashboard/medication');
+  };
+
+  // Enhanced path matching for consult routes  
+  const isConsultActive = () => {
+    return pathname.includes('/dashboard/pregnancy') || 
+           pathname.includes('/dashboard/child') || 
+           pathname.includes('/dashboard/general');
   };
   
   const [userInfo, setUserInfo] = useState<any>(null);
@@ -101,7 +139,7 @@ export default function DashboardLayout({
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-background">
       {/* Overlay for mobile when sidebar is open */}
       {isMobile && sidebarOpen && (
         <div 
@@ -110,17 +148,17 @@ export default function DashboardLayout({
         ></div>
       )}
 
-      <header className="bg-white shadow-sm fixed top-0 left-0 right-0 z-30">
+      <header className="bg-card/80 backdrop-blur-xl shadow-sm border-b border-border/50 fixed top-0 left-0 right-0 z-30">
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center">
             <button
               onClick={toggleSidebar}
-              className="p-2 rounded-md hover:bg-gray-100 mr-2"
+              className="p-2 rounded-xl hover:bg-muted/50 mr-2 transition-colors md:hidden"
               aria-label="Toggle menu"
             >
-              {sidebarOpen && isMobile ? <X size={20} /> : <Menu size={20} />}
+              {sidebarOpen && isMobile ? <X size={20} className="text-foreground" /> : <Menu size={20} className="text-foreground" />}
             </button>
-            <h1 className="text-xl font-semibold truncate">Dashboard</h1>
+            <h1 className="text-xl font-semibold truncate text-foreground">Dashboard</h1>
           </div>
 
           <div className="flex items-center space-x-2 md:space-x-4">
@@ -128,68 +166,68 @@ export default function DashboardLayout({
               <input
                 type="text"
                 placeholder="Search..."
-                className="pl-8 pr-4 py-2 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 w-32 lg:w-64"
+                className="pl-8 pr-4 py-2 rounded-xl bg-muted/50 border border-border/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary w-32 lg:w-64 text-foreground placeholder:text-muted-foreground transition-all"
               />
               <Search
                 size={16}
-                className="absolute left-2 top-2.5 text-gray-500"
+                className="absolute left-2 top-2.5 text-muted-foreground"
               />
             </div>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="p-2 rounded-full hover:bg-gray-100 relative">
-                  <Bell size={20} />
+                <button className="p-2 rounded-xl hover:bg-muted/50 relative transition-colors">
+                  <Bell size={20} className="text-foreground" />
                   <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-72">
-                <DropdownMenuLabel>Notifications</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="cursor-pointer">
+              <DropdownMenuContent align="end" className="w-72 bg-card border-border/50">
+                <DropdownMenuLabel className="text-foreground">Notifications</DropdownMenuLabel>
+                <DropdownMenuSeparator className="bg-border/50" />
+                <DropdownMenuItem className="cursor-pointer focus:bg-muted/50">
                   <div className="flex flex-col">
-                    <span className="font-medium">Appointment Reminder</span>
-                    <span className="text-sm text-gray-500">
+                    <span className="font-medium text-foreground">Appointment Reminder</span>
+                    <span className="text-sm text-muted-foreground">
                       Your next checkup is tomorrow at 2:00 PM
                     </span>
                   </div>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer">
+                <DropdownMenuItem className="cursor-pointer focus:bg-muted/50">
                   <div className="flex flex-col">
-                    <span className="font-medium">New Message</span>
-                    <span className="text-sm text-gray-500">
+                    <span className="font-medium text-foreground">New Message</span>
+                    <span className="text-sm text-muted-foreground">
                       Dr. Smith sent you a message
                     </span>
                   </div>
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="cursor-pointer">
-                  <span className="text-blue-600">View all notifications</span>
+                <DropdownMenuSeparator className="bg-border/50" />
+                <DropdownMenuItem className="cursor-pointer focus:bg-muted/50">
+                  <span className="text-primary">View all notifications</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-medium cursor-pointer">
-                  US
+                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-primary-foreground font-medium cursor-pointer shadow-lg hover:shadow-xl transition-shadow">
+                  {userInfo ? userInfo.first_name[0] + userInfo.last_name[0] : "US"}
                 </div>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="cursor-pointer">
-                  <User className="mr-2 h-4 w-4" />
-                  <span>Profile</span>
+              <DropdownMenuContent align="end" className="bg-card border-border/50">
+                <DropdownMenuLabel className="text-foreground">My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator className="bg-border/50" />
+                <DropdownMenuItem className="cursor-pointer focus:bg-muted/50">
+                  <User className="mr-2 h-4 w-4 text-muted-foreground" />
+                  <span className="text-foreground">Profile</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer">
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Settings</span>
+                <DropdownMenuItem className="cursor-pointer focus:bg-muted/50">
+                  <Settings className="mr-2 h-4 w-4 text-muted-foreground" />
+                  <span className="text-foreground">Settings</span>
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="cursor-pointer" onClick={handleLogout}>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Logout</span>
+                <DropdownMenuSeparator className="bg-border/50" />
+                <DropdownMenuItem className="cursor-pointer focus:bg-muted/50" onClick={handleLogout}>
+                  <LogOut className="mr-2 h-4 w-4 text-destructive" />
+                  <span className="text-destructive">Logout</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -198,15 +236,15 @@ export default function DashboardLayout({
       </header>
 
       <aside
-        className={`fixed left-0 top-0 mt-14 bg-white h-[calc(100vh-56px)] shadow-md transition-all duration-300 z-30 flex flex-col w-64 md:w-64 ${
+        className={`fixed left-0 top-0 mt-14 bg-card/80 backdrop-blur-xl h-[calc(100vh-56px)] shadow-lg border-r border-border/50 transition-all duration-300 z-30 flex flex-col w-64 md:w-64 ${
           sidebarOpen 
             ? "translate-x-0" 
             : "-translate-x-full md:translate-x-0 md:w-20"
         }`}
       >
-        <div className="py-4 flex-grow overflow-y-auto">
+        <div className="py-4 flex-grow overflow-y-auto custom-scrollbar">
           <div className={`px-4 mb-4 ${!sidebarOpen && !isMobile ? "text-center" : ""}`}>
-            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">
+            <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">
               {sidebarOpen || isMobile ? "MAIN NAVIGATION" : "MENU"}
             </h2>
           </div>
@@ -214,121 +252,135 @@ export default function DashboardLayout({
           <nav className="space-y-1 px-2">
             <Link
               href="/dashboard"
-              className={`flex items-center px-4 py-3 rounded-md hover:bg-blue-50 hover:text-blue-600 group ${
-                isActive("/dashboard")
-                  ? "bg-blue-50 text-blue-600"
-                  : "text-gray-900"
+              className={`flex items-center px-4 py-3 rounded-xl hover:bg-primary/10 hover:text-primary group transition-all duration-200 ${
+                pathname === "/dashboard"
+                  ? "bg-primary/10 text-primary shadow-sm"
+                  : "text-foreground"
               } ${!sidebarOpen && !isMobile ? "justify-center" : ""}`}
+              onClick={handleNavigation}
             >
               <Home
                 className={`${
-                  isActive("/dashboard")
-                    ? "text-blue-600"
-                    : "text-gray-500 group-hover:text-blue-600"
-                } ${sidebarOpen || isMobile ? "mr-3" : ""}`}
+                  pathname === "/dashboard"
+                    ? "text-primary"
+                    : "text-muted-foreground group-hover:text-primary"
+                } ${sidebarOpen || isMobile ? "mr-3" : ""} transition-colors`}
                 size={20}
               />
               {(sidebarOpen || isMobile) && <span className="font-medium">Home</span>}
             </Link>
           </nav>
 
-          <div className={`px-4 mb-4 mt-4 ${!sidebarOpen && !isMobile ? "text-center" : ""}`}>
-            <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">
+          <div className={`px-4 mb-4 mt-6 ${!sidebarOpen && !isMobile ? "text-center" : ""}`}>
+            <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">
               {sidebarOpen || isMobile ? "General Care" : "CARE"}
             </h2>
           </div>
 
           <nav className="space-y-1 px-2">
             <Collapsible
-              open={pregnancyOpen}
-              onOpenChange={setPregnancyOpen}
+              open={pregnancyOpen && (sidebarOpen || isMobile)}
+              onOpenChange={(open) => {
+                if (sidebarOpen || isMobile) {
+                  setPregnancyOpen(open);
+                }
+              }}
               className="w-full"
             >
-              <CollapsibleTrigger className="w-full">
+              <CollapsibleTrigger className="w-full" asChild>
                 <div
-                  className={`flex items-center px-4 py-3 rounded-md hover:bg-blue-50 hover:text-blue-600 cursor-pointer group ${
-                    isActive("/pregnancy")
-                      ? "bg-blue-50 text-blue-600"
-                      : "text-gray-900"
+                  className={`flex items-center px-4 py-3 rounded-xl hover:bg-primary/10 hover:text-primary cursor-pointer group transition-all duration-200 ${
+                    isConsultActive()
+                      ? "bg-primary/10 text-primary shadow-sm"
+                      : "text-foreground"
                   } ${!sidebarOpen && !isMobile ? "justify-center" : "justify-between"}`}
+                  onClick={() => {
+                    if (!sidebarOpen && !isMobile) {
+                      // On minimized sidebar, navigate to first item
+                      router.push('/dashboard/pregnancy');
+                    }
+                  }}
                 >
                   <div className={`flex items-center ${!sidebarOpen && !isMobile ? "flex-col" : ""}`}>
                     <PersonStanding
                       className={`${
-                        isActive("/pregnancy")
-                          ? "text-blue-600"
-                          : "text-gray-500 group-hover:text-blue-600"
-                      } ${(sidebarOpen || isMobile) ? "mr-3" : "mb-1"}`}
+                        isConsultActive()
+                          ? "text-primary"
+                          : "text-muted-foreground group-hover:text-primary"
+                      } ${(sidebarOpen || isMobile) ? "mr-3" : "mb-1"} transition-colors`}
                       size={20}
                     />
                     {(sidebarOpen || isMobile) ? (
                       <span className="font-medium">Consult</span>
                     ) : (
-                      <span className="text-xs">Consult</span>
+                      <span className="text-xs text-center">Consult</span>
                     )}
                   </div>
                   {(sidebarOpen || isMobile) && (
                     <ChevronDown
                       size={16}
-                      className={`transform transition-transform duration-200 ${
+                      className={`transform transition-transform duration-200 text-muted-foreground ${
                         pregnancyOpen ? "rotate-180" : ""
                       }`}
                     />
                   )}
                 </div>
               </CollapsibleTrigger>
-              <CollapsibleContent>
+              <CollapsibleContent className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-up-2 data-[state=open]:slide-down-2">
                 <div className={`space-y-1 mt-1 ${(sidebarOpen || isMobile) ? "pl-10 pr-2" : "px-2"}`}>
                   <Link
                     href="/dashboard/pregnancy"
-                    className={`flex items-center px-4 py-2 rounded-md hover:bg-blue-50 hover:text-blue-600 group ${
+                    className={`flex items-center px-4 py-2 rounded-xl hover:bg-primary/10 hover:text-primary group transition-all duration-200 ${
                       isActive("/dashboard/pregnancy")
-                        ? "bg-blue-50 text-blue-600"
-                        : "text-gray-900"
+                        ? "bg-primary/10 text-primary shadow-sm"
+                        : "text-foreground"
                     } ${!sidebarOpen && !isMobile ? "justify-center" : ""}`}
+                    onClick={handleNavigation}
                   >
                     <Activity
                       className={`${
                         isActive("/dashboard/pregnancy")
-                          ? "text-blue-600"
-                          : "text-gray-500 group-hover:text-blue-600"
-                      } ${(sidebarOpen || isMobile) ? "mr-3" : ""}`}
+                          ? "text-primary"
+                          : "text-muted-foreground group-hover:text-primary"
+                      } ${(sidebarOpen || isMobile) ? "mr-3" : ""} transition-colors`}
                       size={16}
                     />
                     {(sidebarOpen || isMobile) && <span className="font-medium text-sm">Pregnancy</span>}
                   </Link>
                   <Link
                     href="/dashboard/child"
-                    className={`flex items-center px-4 py-2 rounded-md hover:bg-blue-50 hover:text-blue-600 group ${
+                    className={`flex items-center px-4 py-2 rounded-xl hover:bg-primary/10 hover:text-primary group transition-all duration-200 ${
                       isActive("/dashboard/child")
-                        ? "bg-blue-50 text-blue-600"
-                        : "text-gray-900"
+                        ? "bg-primary/10 text-primary shadow-sm"
+                        : "text-foreground"
                     } ${!sidebarOpen && !isMobile ? "justify-center" : ""}`}
+                    onClick={handleNavigation}
                   >
                     <Activity
                       className={`${
                         isActive("/dashboard/child")
-                          ? "text-blue-600"
-                          : "text-gray-500 group-hover:text-blue-600"
-                      } ${(sidebarOpen || isMobile) ? "mr-3" : ""}`}
+                          ? "text-primary"
+                          : "text-muted-foreground group-hover:text-primary"
+                      } ${(sidebarOpen || isMobile) ? "mr-3" : ""} transition-colors`}
                       size={16}
                     />
                     {(sidebarOpen || isMobile) && <span className="font-medium text-sm">Child</span>}
                   </Link>
                   <Link
                     href="/dashboard/general"
-                    className={`flex items-center px-4 py-2 rounded-md hover:bg-blue-50 hover:text-blue-600 group ${
+                    className={`flex items-center px-4 py-2 rounded-xl hover:bg-primary/10 hover:text-primary group transition-all duration-200 ${
                       isActive("/dashboard/general")
-                        ? "bg-blue-50 text-blue-600"
-                        : "text-gray-900"
+                        ? "bg-primary/10 text-primary shadow-sm"
+                        : "text-foreground"
                     } ${!sidebarOpen && !isMobile ? "justify-center" : ""}`}
+                    onClick={handleNavigation}
                   >
                     <Activity
                       className={`${
                         isActive("/dashboard/general")
-                          ? "text-blue-600"
-                          : "text-gray-500 group-hover:text-blue-600"
-                      } ${(sidebarOpen || isMobile) ? "mr-3" : ""}`}
+                          ? "text-primary"
+                          : "text-muted-foreground group-hover:text-primary"
+                      } ${(sidebarOpen || isMobile) ? "mr-3" : ""} transition-colors`}
                       size={16}
                     />
                     {(sidebarOpen || isMobile) && <span className="font-medium text-sm">General</span>}
@@ -338,77 +390,89 @@ export default function DashboardLayout({
             </Collapsible>
 
             <Collapsible
-              open={childOpen}
-              onOpenChange={setChildOpen}
+              open={childOpen && (sidebarOpen || isMobile)}
+              onOpenChange={(open) => {
+                if (sidebarOpen || isMobile) {
+                  setChildOpen(open);
+                }
+              }}
               className="w-full"
             >
-              <CollapsibleTrigger className="w-full">
+              <CollapsibleTrigger className="w-full" asChild>
                 <div
-                  className={`flex items-center px-4 py-3 rounded-md hover:bg-blue-50 hover:text-blue-600 cursor-pointer group ${
-                    isActive("/medication")
-                      ? "bg-blue-50 text-blue-600"
-                      : "text-gray-900"
+                  className={`flex items-center px-4 py-3 rounded-xl hover:bg-primary/10 hover:text-primary cursor-pointer group transition-all duration-200 ${
+                    isMedicationActive()
+                      ? "bg-primary/10 text-primary shadow-sm"
+                      : "text-foreground"
                   } ${!sidebarOpen && !isMobile ? "justify-center" : "justify-between"}`}
+                  onClick={() => {
+                    if (!sidebarOpen && !isMobile) {
+                      // On minimized sidebar, navigate to first item
+                      router.push('/dashboard/medication/prescription');
+                    }
+                  }}
                 >
                   <div className={`flex items-center ${!sidebarOpen && !isMobile ? "flex-col" : ""}`}>
                     <Baby
                       className={`${
-                        isActive("/medication")
-                          ? "text-blue-600"
-                          : "text-gray-500 group-hover:text-blue-600"
-                      } ${(sidebarOpen || isMobile) ? "mr-3" : "mb-1"}`}
+                        isMedicationActive()
+                          ? "text-primary"
+                          : "text-muted-foreground group-hover:text-primary"
+                      } ${(sidebarOpen || isMobile) ? "mr-3" : "mb-1"} transition-colors`}
                       size={20}
                     />
                     {(sidebarOpen || isMobile) ? (
                       <span className="font-medium">Medication</span>
                     ) : (
-                      <span className="text-xs">Meds</span>
+                      <span className="text-xs text-center">Meds</span>
                     )}
                   </div>
                   {(sidebarOpen || isMobile) && (
                     <ChevronDown
                       size={16}
-                      className={`transform transition-transform duration-200 ${
+                      className={`transform transition-transform duration-200 text-muted-foreground ${
                         childOpen ? "rotate-180" : ""
                       }`}
                     />
                   )}
                 </div>
               </CollapsibleTrigger>
-              <CollapsibleContent>
+              <CollapsibleContent className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-up-2 data-[state=open]:slide-down-2">
                 <div className={`space-y-1 mt-1 ${(sidebarOpen || isMobile) ? "pl-10 pr-2" : "px-2"}`}>
                   <Link
                     href="/dashboard/medication/prescription"
-                    className={`flex items-center px-4 py-2 rounded-md hover:bg-blue-50 hover:text-blue-600 group ${
-                      isActive("/medication/prescription")
-                        ? "bg-blue-50 text-blue-600"
-                        : "text-gray-900"
+                    className={`flex items-center px-4 py-2 rounded-xl hover:bg-primary/10 hover:text-primary group transition-all duration-200 ${
+                      isActive("/dashboard/medication/prescription")
+                        ? "bg-primary/10 text-primary shadow-sm"
+                        : "text-foreground"
                     } ${!sidebarOpen && !isMobile ? "justify-center" : ""}`}
+                    onClick={handleNavigation}
                   >
                     <Activity
                       className={`${
-                        isActive("/medication/prescription")
-                          ? "text-blue-600"
-                          : "text-gray-500 group-hover:text-blue-600"
-                      } ${(sidebarOpen || isMobile) ? "mr-3" : ""}`}
+                        isActive("/dashboard/medication/prescription")
+                          ? "text-primary"
+                          : "text-muted-foreground group-hover:text-primary"
+                      } ${(sidebarOpen || isMobile) ? "mr-3" : ""} transition-colors`}
                       size={16}
                     />
                     {(sidebarOpen || isMobile) && <span className="font-medium text-sm">Prescription</span>}
                   </Link>
                   <Link
                     href="/dashboard/medication/substitute"
-                    className={`flex items-center px-4 py-2 rounded-md hover:bg-blue-50 hover:text-blue-600 group ${
-                      isActive("/medication/substitute")
-                        ? "bg-blue-50 text-blue-600"
-                        : "text-gray-900"
+                    className={`flex items-center px-4 py-2 rounded-xl hover:bg-primary/10 hover:text-primary group transition-all duration-200 ${
+                      isActive("/dashboard/medication/substitute")
+                        ? "bg-primary/10 text-primary shadow-sm"
+                        : "text-foreground"
                     } ${!sidebarOpen && !isMobile ? "justify-center" : ""}`}
+                    onClick={handleNavigation}
                   >
                     <Activity
                       className={`${
-                        isActive("/medication/substitute")
-                          ? "text-blue-600"
-                          : "text-gray-500 group-hover:text-blue-600"
-                      } ${(sidebarOpen || isMobile) ? "mr-3" : ""}`}
+                        isActive("/dashboard/medication/substitute")
+                          ? "text-primary"
+                          : "text-muted-foreground group-hover:text-primary"
+                      } ${(sidebarOpen || isMobile) ? "mr-3" : ""} transition-colors`}
                       size={16}
                     />
                     {(sidebarOpen || isMobile) && (
@@ -423,39 +487,39 @@ export default function DashboardLayout({
 
         {/* Sidebar Footer with Profile */}
         {(sidebarOpen || isMobile) && (
-          <div className="border-t border-gray-200 p-4">
+          <div className="border-t border-border/50 p-4">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <div className="flex items-center space-x-3 cursor-pointer p-2 rounded-md hover:bg-gray-100">
-                  <div className="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-medium">
-                    US
+                <div className="flex items-center space-x-3 cursor-pointer p-3 rounded-xl hover:bg-primary/10 transition-colors">
+                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-primary-foreground font-medium shadow-lg">
+                    {userInfo ? userInfo.first_name[0] + userInfo.last_name[0] : "US"}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">
+                    <p className="text-sm font-medium text-foreground truncate">
                       {userInfo?.first_name + " " + userInfo?.last_name}
                     </p>
-                    <p className="text-xs text-gray-500 truncate">
+                    <p className="text-xs text-muted-foreground truncate">
                       {userInfo?.email}
                     </p>
                   </div>
-                  <ChevronDown size={16} className="text-gray-500" />
+                  <ChevronDown size={16} className="text-muted-foreground" />
                 </div>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="cursor-pointer">
-                  <User className="mr-2 h-4 w-4" />
-                  <span>Profile</span>
+              <DropdownMenuContent align="end" className="w-56 bg-card border-border/50">
+                <DropdownMenuLabel className="text-foreground">My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator className="bg-border/50" />
+                <DropdownMenuItem className="cursor-pointer focus:bg-muted/50">
+                  <User className="mr-2 h-4 w-4 text-muted-foreground" />
+                  <span className="text-foreground">Profile</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer">
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Settings</span>
+                <DropdownMenuItem className="cursor-pointer focus:bg-muted/50">
+                  <Settings className="mr-2 h-4 w-4 text-muted-foreground" />
+                  <span className="text-foreground">Settings</span>
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="cursor-pointer text-red-600" onClick={handleLogout}>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Logout</span>
+                <DropdownMenuSeparator className="bg-border/50" />
+                <DropdownMenuItem className="cursor-pointer focus:bg-muted/50" onClick={handleLogout}>
+                  <LogOut className="mr-2 h-4 w-4 text-destructive" />
+                  <span className="text-destructive">Logout</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

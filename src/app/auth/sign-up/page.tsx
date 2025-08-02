@@ -46,9 +46,10 @@ const HospitalSignup: React.FC = () => {
     confirmPassword: "",
     phoneNumber: "",
   });
-  const { baseURL, login } = useContext(GFContext); 
+  const { baseURL, register } = useContext(GFContext); 
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [successMessage, setSuccessMessage] = useState<string>("");
   const formRef = useRef<HTMLFormElement>(null);
   const logoRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -84,7 +85,16 @@ const HospitalSignup: React.FC = () => {
       newErrors.password = "Password is required";
       isValid = false;
     } else if (formData.password.length < 8) {
-      newErrors.password = "Password must be at least 8 characters";
+      newErrors.password = "Password must be at least 8 characters long";
+      isValid = false;
+    } else if (!/(?=.*[a-z])/.test(formData.password)) {
+      newErrors.password = "Password must contain at least one lowercase letter";
+      isValid = false;
+    } else if (!/(?=.*[A-Z])/.test(formData.password)) {
+      newErrors.password = "Password must contain at least one uppercase letter";
+      isValid = false;
+    } else if (!/(?=.*\d)/.test(formData.password)) {
+      newErrors.password = "Password must contain at least one number";
       isValid = false;
     }
 
@@ -117,15 +127,23 @@ const HospitalSignup: React.FC = () => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
 
+    // Clear field-specific errors
     if (errors[name as keyof SignupFormData]) {
       setErrors((prev) => ({ ...prev, [name]: undefined }));
+    }
+
+    // Clear general error and success message when user starts typing
+    if (errors.general) {
+      setErrors((prev) => ({ ...prev, general: undefined }));
+    }
+    if (successMessage) {
+      setSuccessMessage("");
     }
   };
 
   const handleSubmit = async (
     e: React.FormEvent<HTMLFormElement>
   ): Promise<void> => {
-    
     e.preventDefault();
     
     if (!validateForm()) {
@@ -133,37 +151,39 @@ const HospitalSignup: React.FC = () => {
     }
 
     setIsSubmitting(true);
-    
-    const res = await fetch(baseURL + '/auth/register/', {
-      method: "POST", 
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    setErrors({}); // Clear any previous errors
+    setSuccessMessage(""); // Clear any previous success message
+
+    try {
+      const result = await register({
         username: formData.email,
         first_name: formData.firstName,
         last_name: formData.lastName,
         email: formData.email,
         password: formData.password
-      }),
-    })
-    if(res.status === 201) {
-      // const data = await res.json();
-      await login(formData.email, formData.password);
-      
-    } else {
-      console.error("Error signup");
+      });
+
+      if (!result.success) {
+        setErrors({ general: result.error || "Registration failed. Please try again." });
+      } else {
+        setSuccessMessage("Account created successfully! Redirecting to dashboard...");
+      }
+      // If successful, register function will handle auto-login and navigation
+    } catch (error) {
+      console.error("Unexpected registration error:", error);
+      setErrors({ general: "An unexpected error occurred. Please try again." });
+    } finally {
+      setIsSubmitting(false);
     }
-    
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900 dark:to-gray-900 transition-colors duration-300">
+    <div className="min-h-screen w-full flex flex-col bg-background">
       <Head>
-        <title>Sign Up | Hospital Management System</title>
+        <title>Sign Up | HealthCare</title>
         <meta
           name="description"
-          content="Sign up for the Hospital Management System"
+          content="Sign up for the HealthCare System"
         />
       </Head>
 
@@ -171,19 +191,19 @@ const HospitalSignup: React.FC = () => {
         <div className="w-full max-w-2xl">
           <div className="text-center mb-8">
             <div ref={logoRef} className="flex justify-center mb-4">
-              <div className="bg-white dark:bg-blue-800 p-3 rounded-full shadow-lg">
-                <HeartPulse className="h-12 w-12 text-blue-600 dark:text-blue-200" />
+              <div className="bg-card p-3 rounded-full shadow-lg border">
+                <HeartPulse className="h-12 w-12 text-primary" />
               </div>
             </div>
             <h1
               ref={titleRef}
-              className="text-4xl font-bold mb-2 text-blue-800 dark:text-blue-200 transition-colors duration-300"
+              className="text-4xl font-bold mb-2 text-foreground heading-maya"
             >
-              Hospital Management System
+              HealthCare
             </h1>
             <p
               ref={subtitleRef}
-              className="text-gray-600 dark:text-gray-300 transition-colors duration-300"
+              className="text-muted-foreground"
             >
               Create your account for the patient management portal
             </p>
@@ -191,7 +211,7 @@ const HospitalSignup: React.FC = () => {
 
           
             <motion.div
-              className="bg-white/90 dark:bg-gray-800/90 rounded-lg shadow-xl p-8 backdrop-blur-sm transition-colors duration-300"
+              className="bg-card/95 rounded-lg shadow-xl p-8 backdrop-blur-sm border"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
@@ -201,13 +221,13 @@ const HospitalSignup: React.FC = () => {
                   <div>
                     <label
                       htmlFor="firstName"
-                      className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-200 transition-colors duration-300"
+                      className="block text-sm font-medium mb-2 text-foreground"
                     >
                       First Name
                     </label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <User className="h-5 w-5 text-gray-400" />
+                        <User className="h-5 w-5 text-muted-foreground" />
                       </div>
                       <motion.input
                         variants={inputVariants}
@@ -219,17 +239,17 @@ const HospitalSignup: React.FC = () => {
                         name="firstName"
                         value={formData.firstName}
                         onChange={handleChange}
-                        className={`w-full pl-10 pr-4 py-3 rounded-lg border ${
+                        className={`w-full pl-10 pr-4 py-3 rounded-lg border bg-background text-foreground focus:ring-2 focus:ring-ring outline-none ${
                           errors.firstName
-                            ? "border-red-500 dark:border-red-500"
-                            : "border-gray-300 dark:border-gray-600"
-                        } dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-colors duration-300`}
+                            ? "border-destructive"
+                            : "border-border"
+                        }`}
                         placeholder="John"
                         aria-invalid={errors.firstName ? "true" : "false"}
                       />
                     </div>
                     {errors.firstName && (
-                      <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                      <p className="mt-1 text-sm text-destructive">
                         {errors.firstName}
                       </p>
                     )}
@@ -238,13 +258,13 @@ const HospitalSignup: React.FC = () => {
                   <div>
                     <label
                       htmlFor="lastName"
-                      className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-200 transition-colors duration-300"
+                      className="block text-sm font-medium mb-2 text-foreground"
                     >
                       Last Name
                     </label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <User className="h-5 w-5 text-gray-400" />
+                        <User className="h-5 w-5 text-muted-foreground" />
                       </div>
                       <motion.input
                         variants={inputVariants}
@@ -256,17 +276,17 @@ const HospitalSignup: React.FC = () => {
                         name="lastName"
                         value={formData.lastName}
                         onChange={handleChange}
-                        className={`w-full pl-10 pr-4 py-3 rounded-lg border ${
+                        className={`w-full pl-10 pr-4 py-3 rounded-lg border bg-background text-foreground focus:ring-2 focus:ring-ring outline-none ${
                           errors.lastName
-                            ? "border-red-500 dark:border-red-500"
-                            : "border-gray-300 dark:border-gray-600"
-                        } dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-colors duration-300`}
+                            ? "border-destructive"
+                            : "border-border"
+                        }`}
                         placeholder="Doe"
                         aria-invalid={errors.lastName ? "true" : "false"}
                       />
                     </div>
                     {errors.lastName && (
-                      <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                      <p className="mt-1 text-sm text-destructive">
                         {errors.lastName}
                       </p>
                     )}
@@ -276,13 +296,13 @@ const HospitalSignup: React.FC = () => {
                 <div className="mb-6">
                   <label
                     htmlFor="email"
-                    className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-200 transition-colors duration-300"
+                    className="block text-sm font-medium mb-2 text-foreground"
                   >
                     Email Address
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Mail className="h-5 w-5 text-gray-400" />
+                      <Mail className="h-5 w-5 text-muted-foreground" />
                     </div>
                     <motion.input
                       variants={inputVariants}
@@ -294,17 +314,17 @@ const HospitalSignup: React.FC = () => {
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
-                      className={`w-full pl-10 pr-4 py-3 rounded-lg border ${
+                      className={`w-full pl-10 pr-4 py-3 rounded-lg border bg-background text-foreground focus:ring-2 focus:ring-ring outline-none ${
                         errors.email
-                          ? "border-red-500 dark:border-red-500"
-                          : "border-gray-300 dark:border-gray-600"
+                          ? "border-destructive"
+                          : "border-border"
                       } dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-colors duration-300`}
                       placeholder="john.doe@hospital.com"
                       aria-invalid={errors.email ? "true" : "false"}
                     />
                   </div>
                   {errors.email && (
-                    <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                    <p className="mt-1 text-sm text-destructive">
                       {errors.email}
                     </p>
                   )}
@@ -314,13 +334,13 @@ const HospitalSignup: React.FC = () => {
                   <div>
                     <label
                       htmlFor="password"
-                      className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-200 transition-colors duration-300"
+                      className="block text-sm font-medium mb-2 text-foreground"
                     >
                       Password
                     </label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <KeyRound className="h-5 w-5 text-gray-400" />
+                        <KeyRound className="h-5 w-5 text-muted-foreground" />
                       </div>
                       <motion.input
                         variants={inputVariants}
@@ -332,17 +352,17 @@ const HospitalSignup: React.FC = () => {
                         name="password"
                         value={formData.password}
                         onChange={handleChange}
-                        className={`w-full pl-10 pr-4 py-3 rounded-lg border ${
+                        className={`w-full pl-10 pr-4 py-3 rounded-lg border bg-background text-foreground focus:ring-2 focus:ring-ring outline-none ${
                           errors.password
-                            ? "border-red-500 dark:border-red-500"
-                            : "border-gray-300 dark:border-gray-600"
-                        } dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-colors duration-300`}
+                            ? "border-destructive"
+                            : "border-border"
+                        }`}
                         placeholder="••••••••"
                         aria-invalid={errors.password ? "true" : "false"}
                       />
                     </div>
                     {errors.password && (
-                      <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                      <p className="mt-1 text-sm text-destructive">
                         {errors.password}
                       </p>
                     )}
@@ -351,13 +371,13 @@ const HospitalSignup: React.FC = () => {
                   <div>
                     <label
                       htmlFor="confirmPassword"
-                      className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-200 transition-colors duration-300"
+                      className="block text-sm font-medium mb-2 text-foreground"
                     >
                       Confirm Password
                     </label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <KeyRound className="h-5 w-5 text-gray-400" />
+                        <KeyRound className="h-5 w-5 text-muted-foreground" />
                       </div>
                       <motion.input
                         variants={inputVariants}
@@ -369,31 +389,44 @@ const HospitalSignup: React.FC = () => {
                         name="confirmPassword"
                         value={formData.confirmPassword}
                         onChange={handleChange}
-                        className={`w-full pl-10 pr-4 py-3 rounded-lg border ${
+                        className={`w-full pl-10 pr-4 py-3 rounded-lg border bg-background text-foreground focus:ring-2 focus:ring-ring outline-none ${
                           errors.confirmPassword
-                            ? "border-red-500 dark:border-red-500"
-                            : "border-gray-300 dark:border-gray-600"
-                        } dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-colors duration-300`}
+                            ? "border-destructive"
+                            : "border-border"
+                        }`}
                         placeholder="••••••••"
                         aria-invalid={errors.confirmPassword ? "true" : "false"}
                       />
                     </div>
                     {errors.confirmPassword && (
-                      <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                      <p className="mt-1 text-sm text-destructive">
                         {errors.confirmPassword}
                       </p>
                     )}
                   </div>
                 </div>
 
-                {errors.general && (
+                {successMessage && (
                   <motion.div
-                    className="mb-6 p-3 bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-200 rounded-lg text-sm transition-colors duration-300"
+                    className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 rounded-xl text-sm border border-green-200 dark:border-green-800 backdrop-blur-sm flex items-center gap-2"
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
                   >
-                    {errors.general}
+                    <span className="text-green-600 dark:text-green-400 text-lg">✓</span>
+                    <span>{successMessage}</span>
+                  </motion.div>
+                )}
+
+                {errors.general && (
+                  <motion.div
+                    className="mb-6 p-4 bg-destructive/10 text-destructive rounded-xl text-sm border border-destructive/20 backdrop-blur-sm flex items-center gap-2"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                  >
+                    <span className="text-destructive text-lg">⚠</span>
+                    <span>{errors.general}</span>
                   </motion.div>
                 )}
 
@@ -405,12 +438,12 @@ const HospitalSignup: React.FC = () => {
                     whileTap="tap"
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white font-medium py-3 rounded-lg transition-colors duration-300 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center"
+                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-3 rounded-lg transition-colors duration-300 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center"
                   >
                     {isSubmitting ? (
                       <>
                         <svg
-                          className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                          className="animate-spin -ml-1 mr-3 h-5 w-5 text-primary-foreground"
                           xmlns="http://www.w3.org/2000/svg"
                           fill="none"
                           viewBox="0 0 24 24"
@@ -437,11 +470,11 @@ const HospitalSignup: React.FC = () => {
                   </motion.button>
 
                   <div className="text-center">
-                    <p className="text-sm text-gray-600 dark:text-gray-300 transition-colors duration-300">
+                    <p className="text-sm text-muted-foreground">
                       Already have an account?{" "}
                       <Link
                         href="/auth/login"
-                        className="text-blue-600 dark:text-blue-400 hover:underline font-medium transition-colors duration-300"
+                        className="text-primary hover:underline font-medium"
                       >
                         Sign in
                       </Link>

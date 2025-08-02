@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { createPortal } from "react-dom";
 import {
   Calendar,
   ChevronRight,
@@ -175,25 +176,34 @@ const LabResultsTimeline: React.FC = () => {
   }, []);
 
   return (
-    <div className="h-full flex flex-col">
-      <TimelineModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSuccess={handleFormSuccess}
-      />
+    <>
+      {/* Render modals using portals to escape container constraints */}
+      {typeof window !== "undefined" && createPortal(
+        <TimelineModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onSuccess={handleFormSuccess}
+        />,
+        document.body
+      )}
 
-      <TimelineDetailsModal
-        isOpen={detailModalOpen}
-        onClose={() => setDetailModalOpen(false)}
-        entryId={null}
-        entryDetails={selectedEntryDetails}
-      />
+      {typeof window !== "undefined" && createPortal(
+        <TimelineDetailsModal
+          isOpen={detailModalOpen}
+          onClose={() => setDetailModalOpen(false)}
+          entryId={null}
+          entryDetails={selectedEntryDetails}
+        />,
+        document.body
+      )}
+
+      <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="px-4 py-4 border-b border-gray-100 ">
+      <div className="px-4 py-4 border-b border-border">
         <div className="flex justify-between items-start">
           <div>
             <motion.h1
-              className="text-xl font-bold text-gray-900"
+              className="text-xl font-bold text-foreground"
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
@@ -201,7 +211,7 @@ const LabResultsTimeline: React.FC = () => {
               Timeline
             </motion.h1>
             <motion.p
-              className="text-xs text-gray-500 mt-1"
+              className="text-xs text-muted-foreground mt-1"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.1 }}
@@ -211,8 +221,7 @@ const LabResultsTimeline: React.FC = () => {
           </div>
           <div className="flex items-center space-x-1">
             <motion.button
-              className="p-2 bg-blue-500 text-white rounded-full shadow-sm hover:bg-blue-700 hover:text-white
-               transition-colors flex justify-center items-center"
+              className="p-2 bg-primary text-primary-foreground rounded-full shadow-sm hover:bg-primary/90 transition-colors flex justify-center items-center"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setIsModalOpen(true)}
@@ -225,16 +234,16 @@ const LabResultsTimeline: React.FC = () => {
       </div>
 
       {/* Search */}
-      <div className="px-4 pt-3 pb-2 border-b border-gray-100">
+      <div className="px-4 pt-3 pb-2 border-b border-border">
         <div className="relative w-full">
           <input
             type="text"
             placeholder="Search diseases, hospitals, medicines..."
-            className="w-full py-2 pl-3 pr-10 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+            className="w-full py-2 pl-3 pr-10 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent text-sm placeholder:text-muted-foreground"
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
           />
-          <div className="absolute right-3 top-2 text-gray-400">
+          <div className="absolute right-3 top-2 text-muted-foreground">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-5 w-5"
@@ -255,7 +264,7 @@ const LabResultsTimeline: React.FC = () => {
         {/* Filter toggle */}
         <div className="flex justify-between items-center mt-2">
           <button
-            className="flex items-center text-sm text-blue-500 cursor-pointer"
+            className="flex items-center text-sm text-primary cursor-pointer hover:text-primary/80 transition-colors"
             onClick={() => setFiltersVisible(!filtersVisible)}
           >
             <Filter className="w-3 h-3 mr-1" />
@@ -263,7 +272,7 @@ const LabResultsTimeline: React.FC = () => {
           </button>
 
           {filteredAndSortedResults.length > 0 && (
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-muted-foreground">
               {filteredAndSortedResults.length} result
               {filteredAndSortedResults.length !== 1 ? "s" : ""}
             </p>
@@ -284,8 +293,8 @@ const LabResultsTimeline: React.FC = () => {
                 <button
                   className={`px-3 py-1 text-xs font-medium rounded-full whitespace-nowrap transition-colors ${
                     selectedFilter === "all"
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground hover:bg-muted/80"
                   }`}
                   onClick={() => setSelectedFilter("all")}
                 >
@@ -332,18 +341,18 @@ const LabResultsTimeline: React.FC = () => {
         <div className="relative">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-8">
-              <div className="w-8 h-8 border-t-2 border-b-2 border-blue-500 rounded-full animate-spin mb-3"></div>
-              <p className="text-sm text-gray-600">Loading timeline data...</p>
+              <div className="w-8 h-8 border-t-2 border-b-2 border-primary rounded-full animate-spin mb-3"></div>
+              <p className="text-sm text-muted-foreground">Loading timeline data...</p>
             </div>
           ) : error ? (
             <div className="flex flex-col items-center justify-center py-8">
-              <div className="bg-red-100 p-3 rounded-full mb-3">
-                <AlertCircle className="w-6 h-6 text-red-500" />
+              <div className="bg-destructive/10 p-3 rounded-full mb-3">
+                <AlertCircle className="w-6 h-6 text-destructive" />
               </div>
-              <h3 className="text-base font-medium text-gray-800">Error</h3>
-              <p className="text-xs text-gray-500 mt-1 text-center">{error}</p>
+              <h3 className="text-base font-medium text-foreground">Error</h3>
+              <p className="text-xs text-muted-foreground mt-1 text-center">{error}</p>
               <button
-                className="mt-3 px-3 py-1.5 bg-blue-500 text-white text-sm rounded-md hover:bg-blue-600 transition-colors"
+                className="mt-3 px-3 py-1.5 bg-primary text-primary-foreground text-sm rounded-md hover:bg-primary/90 transition-colors"
                 onClick={() => window.location.reload()}
               >
                 Retry
@@ -351,17 +360,17 @@ const LabResultsTimeline: React.FC = () => {
             </div>
           ) : filteredAndSortedResults.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8">
-              <div className="bg-gray-100 p-3 rounded-full mb-3">
-                <AlertCircle className="w-6 h-6 text-gray-400" />
+              <div className="bg-muted p-3 rounded-full mb-3">
+                <AlertCircle className="w-6 h-6 text-muted-foreground" />
               </div>
-              <h3 className="text-base font-medium text-gray-800">
+              <h3 className="text-base font-medium text-foreground">
                 No matching results
               </h3>
-              <p className="text-xs text-gray-500 mt-1 text-center">
+              <p className="text-xs text-muted-foreground mt-1 text-center">
                 Try adjusting your filters or search
               </p>
               <button
-                className="mt-3 px-3 py-1.5 bg-blue-500 text-white text-sm rounded-md hover:bg-blue-600 transition-colors"
+                className="mt-3 px-3 py-1.5 bg-primary text-primary-foreground text-sm rounded-md hover:bg-primary/90 transition-colors"
                 onClick={() => {
                   setSelectedFilter("all");
                   setSearchText("");
@@ -372,7 +381,7 @@ const LabResultsTimeline: React.FC = () => {
             </div>
           ) : (
             <>
-              <div className="absolute left-8 top-6 bottom-0 w-0.5 bg-blue-100" />
+              <div className="absolute left-8 top-6 bottom-0 w-0.5 bg-border" />
 
               {filteredAndSortedResults.map((entry, index) => (
                 <motion.div
@@ -383,7 +392,7 @@ const LabResultsTimeline: React.FC = () => {
                   className={`relative ${index !== 0 ? "mt-8" : ""}`}
                 >
                   <div className="absolute left-0 top-6 flex flex-col items-center">
-                    <div className="text-xs font-medium text-gray-500 w-4">
+                    <div className="text-xs font-medium text-muted-foreground w-4">
                       {formatMonth(entry.date_from)}
                     </div>
                     <motion.div
@@ -392,7 +401,7 @@ const LabResultsTimeline: React.FC = () => {
                           ? "bg-green-500"
                           : entry.disease.toLowerCase() === "piles"
                           ? "bg-yellow-500"
-                          : "bg-blue-500"
+                          : "bg-primary"
                       }`}
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
@@ -405,7 +414,7 @@ const LabResultsTimeline: React.FC = () => {
                   </div>
 
                   <motion.div
-                    className="ml-12 bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden transition-all"
+                    className="ml-12 bg-card rounded-lg shadow-sm border border-border overflow-hidden transition-all"
                     whileHover={{
                       scale: 1.01,
                       boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
@@ -419,7 +428,7 @@ const LabResultsTimeline: React.FC = () => {
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
                           <div className="flex items-center">
-                            <h3 className="font-semibold text-gray-900 text-sm">
+                            <h3 className="font-semibold text-foreground text-sm">
                               {entry.hospital}
                             </h3>
                             <motion.div
@@ -429,12 +438,12 @@ const LabResultsTimeline: React.FC = () => {
                               transition={{ duration: 0.3 }}
                               className="ml-1"
                             >
-                              <ChevronRight className="w-4 h-4 text-gray-400" />
+                              <ChevronRight className="w-4 h-4 text-muted-foreground" />
                             </motion.div>
                           </div>
 
                           <div className="flex items-center mt-1 text-xs">
-                            <div className="flex items-center text-gray-500">
+                            <div className="flex items-center text-muted-foreground">
                               <Calendar className="w-3 h-3 mr-1" />
                               <span>
                                 {formatDate(entry.date_from)} -{" "}
@@ -480,28 +489,28 @@ const LabResultsTimeline: React.FC = () => {
                               duration: 0.3,
                             },
                           }}
-                          className="border-t border-gray-100 bg-blue-50 overflow-hidden"
+                          className="border-t border-border bg-accent/30 overflow-hidden"
                         >
                           <div className="p-3">
-                            <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-                              <div className="grid grid-cols-12 text-xs font-medium text-gray-500 p-2 border-b border-gray-200 bg-gray-50">
+                            <div className="bg-card rounded-lg shadow-sm overflow-hidden">
+                              <div className="grid grid-cols-12 text-xs font-medium text-muted-foreground p-2 border-b border-border bg-muted">
                                 <div className="col-span-4">Detail</div>
                                 <div className="col-span-8 text-left">
                                   Information
                                 </div>
                               </div>
 
-                              <div className="divide-y divide-gray-100">
+                              <div className="divide-y divide-border">
                                 <motion.div
                                   className="grid grid-cols-12 text-xs p-2"
                                   initial={{ opacity: 0, y: 5 }}
                                   animate={{ opacity: 1, y: 0 }}
                                   transition={{ delay: 0.1 }}
                                 >
-                                  <div className="col-span-4 font-medium text-gray-700">
+                                  <div className="col-span-4 font-medium text-foreground">
                                     Hospital
                                   </div>
-                                  <div className="col-span-8 text-left text-gray-700">
+                                  <div className="col-span-8 text-left text-foreground">
                                     {entry.hospital}
                                   </div>
                                 </motion.div>
@@ -512,7 +521,7 @@ const LabResultsTimeline: React.FC = () => {
                                   animate={{ opacity: 1, y: 0 }}
                                   transition={{ delay: 0.15 }}
                                 >
-                                  <div className="col-span-4 font-medium text-gray-700">
+                                  <div className="col-span-4 font-medium text-foreground">
                                     Disease
                                   </div>
                                   <div className="col-span-8 text-left">
@@ -532,10 +541,10 @@ const LabResultsTimeline: React.FC = () => {
                                   animate={{ opacity: 1, y: 0 }}
                                   transition={{ delay: 0.2 }}
                                 >
-                                  <div className="col-span-4 font-medium text-gray-700">
+                                  <div className="col-span-4 font-medium text-foreground">
                                     Medicine
                                   </div>
-                                  <div className="col-span-8 text-left text-gray-700">
+                                  <div className="col-span-8 text-left text-foreground">
                                     {entry.medicine}
                                   </div>
                                 </motion.div>
@@ -546,10 +555,10 @@ const LabResultsTimeline: React.FC = () => {
                                   animate={{ opacity: 1, y: 0 }}
                                   transition={{ delay: 0.25 }}
                                 >
-                                  <div className="col-span-4 font-medium text-gray-700">
+                                  <div className="col-span-4 font-medium text-foreground">
                                     Period
                                   </div>
-                                  <div className="col-span-8 text-left text-gray-700">
+                                  <div className="col-span-8 text-left text-foreground">
                                     {formatDate(entry.date_from)} -{" "}
                                     {formatDate(entry.date_to)}
                                   </div>
@@ -563,13 +572,13 @@ const LabResultsTimeline: React.FC = () => {
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: 0.3 }}
                                   >
-                                    <div className="font-medium text-gray-700 mb-2 text-xs">
+                                    <div className="font-medium text-foreground mb-2 text-xs">
                                       Attachment
                                     </div>
-                                    <div className="bg-gray-50 rounded-lg p-2 border border-gray-200">
+                                    <div className="bg-muted rounded-lg p-2 border border-border">
                                       <div className="flex items-center justify-center gap-3">
                                         <motion.button
-                                          className="px-4 py-2 text-sm bg-blue-500 rounded-md text-white hover:bg-blue-600 transition-colors flex items-center"
+                                          className="px-4 py-2 text-sm bg-primary rounded-md text-primary-foreground hover:bg-primary/90 transition-colors flex items-center"
                                           whileHover={{ scale: 1.05 }}
                                           whileTap={{ scale: 0.95 }}
                                           onClick={() =>
@@ -584,7 +593,7 @@ const LabResultsTimeline: React.FC = () => {
                                         </motion.button>
 
                                         <motion.button
-                                          className="px-4 py-2 text-sm bg-blue-500 rounded-md text-white hover:bg-blue-600 transition-colors flex items-center"
+                                          className="px-4 py-2 text-sm bg-primary rounded-md text-primary-foreground hover:bg-primary/90 transition-colors flex items-center"
                                           whileHover={{ scale: 1.05 }}
                                           whileTap={{ scale: 0.95 }}
                                           onClick={() => {
@@ -624,7 +633,8 @@ const LabResultsTimeline: React.FC = () => {
         </div>
       </div>
 
-    </div>
+      </div>
+    </>
   );
 };
 

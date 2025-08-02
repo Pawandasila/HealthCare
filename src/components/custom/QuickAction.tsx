@@ -19,7 +19,7 @@ const QuickAction = () => {
       transition={{ delay: 0.6 }}
       className="mt-8"
     >
-      <h2 className="text-xl font-bold mb-4">Quick Actions</h2>
+      <h2 className="text-xl font-bold mb-4 text-card-foreground">Quick Actions</h2>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <MotionButton
           className="h-24 flex flex-col items-center justify-center"

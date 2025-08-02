@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Upload, Calendar } from "lucide-react";
 import { format } from "date-fns";
@@ -26,6 +26,23 @@ const TimelineModal: React.FC<TimelineModalProps> = ({ isOpen, onClose, onSucces
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.classList.add('modal-open');
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.classList.remove('modal-open');
+      document.body.style.overflow = 'unset';
+    }
+    
+    // Cleanup on unmount
+    return () => {
+      document.body.classList.remove('modal-open');
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
   
   const [formData, setFormData] = useState<TimelineFormData>({
     date_from: format(new Date(), "yyyy-MM-dd"),
@@ -113,38 +130,54 @@ const TimelineModal: React.FC<TimelineModalProps> = ({ isOpen, onClose, onSucces
     }
   };
 
+  // Prevent scroll propagation to background
+  const handleScrollableAreaWheel = (e: React.WheelEvent) => {
+    e.stopPropagation();
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={handleBackdropClick}
+          onWheel={(e) => e.preventDefault()}
         >
           <motion.div
-            className="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden"
+            className="bg-card rounded-2xl shadow-2xl w-full max-w-lg max-h-[94vh] border border-border flex flex-col"
             initial={{ scale: 0.9, y: 20, opacity: 0 }}
             animate={{ scale: 1, y: 0, opacity: 1 }}
             exit={{ scale: 0.9, y: 20, opacity: 0 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            onClick={(e) => e.stopPropagation()}
+            onWheel={handleScrollableAreaWheel}
           >
             {/* Header */}
-            <div className="px-4 py-3 bg-blue-500 text-white flex justify-between items-center">
-              <h3 className="font-medium">Add Medical Record</h3>
+            <div className="px-6 py-4 bg-primary text-primary-foreground flex justify-between items-center flex-shrink-0 rounded-t-2xl">
+              <h3 className="font-semibold text-lg">Add Medical Record</h3>
               <button
                 onClick={onClose}
-                className="text-white hover:bg-blue-600 p-1 rounded-full transition-colors"
+                className="text-primary-foreground hover:bg-primary-foreground/10 p-2 rounded-full transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
             
-            {/* Form */}
-            <form onSubmit={handleSubmit} className="p-4">
+            {/* Form - Scrollable Content */}
+            <div 
+              className="flex-1 overflow-y-auto custom-scrollbar modal-scroll-container scroll-smooth"
+              style={{ 
+                maxHeight: 'calc(94vh - 140px)'
+              }}
+              onWheel={handleScrollableAreaWheel}
+            >
+              <div className="p-6">
+                <form onSubmit={handleSubmit} className="space-y-6">
               {error && (
-                <div className="mb-4 p-2 bg-red-100 text-red-700 text-sm rounded-md">
+                <div className="mb-4 p-3 bg-destructive/10 text-destructive text-sm rounded-lg border border-destructive/20">
                   {error}
                 </div>
               )}
@@ -153,7 +186,7 @@ const TimelineModal: React.FC<TimelineModalProps> = ({ isOpen, onClose, onSucces
                 {/* Date range */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label htmlFor="date_from" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="date_from" className="block text-sm font-medium text-card-foreground mb-2">
                       From Date
                     </label>
                     <div className="relative">
@@ -163,14 +196,14 @@ const TimelineModal: React.FC<TimelineModalProps> = ({ isOpen, onClose, onSucces
                         name="date_from"
                         value={formData.date_from}
                         onChange={handleChange}
-                        className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
+                        className="block w-full px-3 py-2 border border-input rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring text-sm bg-background text-foreground"
                         required
                       />
-                      <Calendar className="absolute right-3 top-2 w-4 h-4 text-gray-400 pointer-events-none" />
+                      <Calendar className="absolute right-3 top-2 w-4 h-4 text-muted-foreground pointer-events-none" />
                     </div>
                   </div>
                   <div>
-                    <label htmlFor="date_to" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="date_to" className="block text-sm font-medium text-card-foreground mb-2">
                       To Date
                     </label>
                     <div className="relative">
@@ -180,17 +213,17 @@ const TimelineModal: React.FC<TimelineModalProps> = ({ isOpen, onClose, onSucces
                         name="date_to"
                         value={formData.date_to}
                         onChange={handleChange}
-                        className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
+                        className="block w-full px-3 py-2 border border-input rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring text-sm bg-background text-foreground"
                         required
                       />
-                      <Calendar className="absolute right-3 top-2 w-4 h-4 text-gray-400 pointer-events-none" />
+                      <Calendar className="absolute right-3 top-2 w-4 h-4 text-muted-foreground pointer-events-none" />
                     </div>
                   </div>
                 </div>
                 
                 {/* Hospital */}
                 <div>
-                  <label htmlFor="hospital" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="hospital" className="block text-sm font-medium text-card-foreground mb-2">
                     Hospital/Clinic
                   </label>
                   <input
@@ -200,14 +233,14 @@ const TimelineModal: React.FC<TimelineModalProps> = ({ isOpen, onClose, onSucces
                     value={formData.hospital}
                     onChange={handleChange}
                     placeholder="Enter hospital or clinic name"
-                    className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
+                    className="block w-full px-3 py-2 border border-input rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring text-sm bg-background text-foreground"
                     required
                   />
                 </div>
                 
                 {/* Disease */}
                 <div>
-                  <label htmlFor="disease" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="disease" className="block text-sm font-medium text-card-foreground mb-2">
                     Condition
                   </label>
                   <select
@@ -215,7 +248,7 @@ const TimelineModal: React.FC<TimelineModalProps> = ({ isOpen, onClose, onSucces
                     name="disease"
                     value={formData.disease}
                     onChange={handleChange}
-                    className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
+                    className="block w-full px-3 py-2 border border-input rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring text-sm bg-background text-foreground"
                     required
                   >
                     <option value="">Select condition</option>
@@ -229,7 +262,7 @@ const TimelineModal: React.FC<TimelineModalProps> = ({ isOpen, onClose, onSucces
                 
                 {/* Medicine */}
                 <div>
-                  <label htmlFor="medicine" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="medicine" className="block text-sm font-medium text-card-foreground mb-2">
                     Medicine/Treatment
                   </label>
                   <input
@@ -239,14 +272,14 @@ const TimelineModal: React.FC<TimelineModalProps> = ({ isOpen, onClose, onSucces
                     value={formData.medicine}
                     onChange={handleChange}
                     placeholder="Enter prescribed medicines or treatment"
-                    className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
+                    className="block w-full px-3 py-2 border border-input rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring text-sm bg-background text-foreground"
                     required
                   />
                 </div>
                 
                 {/* Description */}
                 <div>
-                  <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="description" className="block text-sm font-medium text-card-foreground mb-2">
                     Description (Optional)
                   </label>
                   <textarea
@@ -256,16 +289,16 @@ const TimelineModal: React.FC<TimelineModalProps> = ({ isOpen, onClose, onSucces
                     onChange={handleChange}
                     placeholder="Add additional notes"
                     rows={3}
-                    className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
+                    className="block w-full px-3 py-2 border border-input rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring text-sm bg-background text-foreground"
                   />
                 </div>
                 
                 {/* Image upload */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-card-foreground mb-2">
                     Attachment (Optional)
                   </label>
-                  <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                  <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed border-border rounded-lg bg-muted/50">
                     <div className="space-y-1 text-center">
                       {imagePreview ? (
                         <div className="flex flex-col items-center">
@@ -273,7 +306,7 @@ const TimelineModal: React.FC<TimelineModalProps> = ({ isOpen, onClose, onSucces
                             <img 
                               src={imagePreview} 
                               alt="Preview" 
-                              className="w-full h-full object-cover rounded-md"
+                              className="w-full h-full object-cover rounded-lg"
                             />
                             <button
                               type="button"
@@ -281,7 +314,7 @@ const TimelineModal: React.FC<TimelineModalProps> = ({ isOpen, onClose, onSucces
                                 setImagePreview(null);
                                 setFormData(prev => ({ ...prev, image: null }));
                               }}
-                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
+                              className="absolute -top-2 -right-2 bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded-full p-1 transition-colors"
                             >
                               <X className="w-3 h-3" />
                             </button>
@@ -289,11 +322,11 @@ const TimelineModal: React.FC<TimelineModalProps> = ({ isOpen, onClose, onSucces
                         </div>
                       ) : (
                         <>
-                          <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                          <div className="flex text-sm text-gray-600">
+                          <Upload className="mx-auto h-12 w-12 text-muted-foreground" />
+                          <div className="flex text-sm text-muted-foreground">
                             <label
                               htmlFor="file-upload"
-                              className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none"
+                              className="relative cursor-pointer bg-background rounded-md font-medium text-primary hover:text-primary/80 focus-within:outline-none px-2 py-1"
                             >
                               <span>Upload a file</span>
                               <input
@@ -307,7 +340,7 @@ const TimelineModal: React.FC<TimelineModalProps> = ({ isOpen, onClose, onSucces
                             </label>
                             <p className="pl-1">or drag and drop</p>
                           </div>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-xs text-muted-foreground">
                             PNG, JPG, GIF up to 10MB
                           </p>
                         </>
@@ -318,22 +351,23 @@ const TimelineModal: React.FC<TimelineModalProps> = ({ isOpen, onClose, onSucces
               </div>
               
               {/* Form actions */}
-              <div className="mt-6 flex items-center justify-end space-x-3">
+              <div className="mt-6 flex items-center justify-end space-x-3 pt-4 border-t border-border bg-card px-6 py-4 flex-shrink-0 rounded-b-2xl">
                 <Button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-200 transition-colors"
+                  variant="outline"
+                  className="px-4 py-2 text-sm font-medium"
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-md hover:bg-blue-600 transition-colors flex items-center"
+                  className="px-4 py-2 text-sm font-medium flex items-center"
                 >
                   {isSubmitting ? (
                     <>
-                      <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
+                      <span className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin mr-2"></span>
                       Saving...
                     </>
                   ) : (
@@ -341,7 +375,9 @@ const TimelineModal: React.FC<TimelineModalProps> = ({ isOpen, onClose, onSucces
                   )}
                 </Button>
               </div>
-            </form>
+              </form>
+              </div>
+            </div>
           </motion.div>
         </motion.div>
       )}
