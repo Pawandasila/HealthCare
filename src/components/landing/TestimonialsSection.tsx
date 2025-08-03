@@ -1,48 +1,9 @@
 "use client";
-import React, { useMemo } from "react";
-import { motion } from "framer-motion";
+import React from "react";
 import { HeartPulse, Star } from "lucide-react";
 
-const AnimatedCard = React.memo(({
-  children,
-  delay = 0,
-}: {
-  children: React.ReactNode;
-  delay: number;
-}) => {
-  const cardVariants = useMemo(() => ({
-    initial: { opacity: 0, y: 50 },
-    whileInView: { opacity: 1, y: 0 },
-    whileHover: {
-      y: -10,
-      boxShadow:
-        "0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2)",
-    }
-  }), []);
-
-  const transition = useMemo(() => ({ 
-    duration: 0.5, 
-    delay: delay * 0.2 
-  }), [delay]);
-
-  return (
-    <motion.div
-      variants={cardVariants}
-      initial="initial"
-      whileInView="whileInView"
-      whileHover="whileHover"
-      viewport={{ once: true }}
-      transition={transition}
-    >
-      {children}
-    </motion.div>
-  );
-});
-
-AnimatedCard.displayName = 'AnimatedCard';
-
-const TestimonialsSection: React.FC = React.memo(() => {
-  const testimonials = useMemo(() => [
+const TestimonialsSection = () => {
+  const testimonials = [
     {
       name: "Sarah Johnson",
       role: "Diabetes Prevention Success",
@@ -67,26 +28,15 @@ const TestimonialsSection: React.FC = React.memo(() => {
       rating: 5,
       color: "from-purple-400 to-pink-500"
     },
-  ], []);
+  ];
 
   return (
     <section id="testimonials" className="py-24 px-4 md:px-12 lg:px-24 bg-gradient-to-br from-gray-900 to-black">
-      <motion.div
-        className="text-center mb-20"
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6 }}
-      >
-        <motion.div
-          className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-900/50 to-purple-900/50 rounded-full text-sm font-medium text-blue-300 mb-6 border border-blue-800/30"
-          initial={{ opacity: 0, scale: 0.8 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-        >
+      <div className="text-center mb-20">
+        <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-900/50 to-purple-900/50 rounded-full text-sm font-medium text-blue-300 mb-6 border border-blue-800/30">
           <HeartPulse className="w-4 h-4 mr-2" />
           Success Stories
-        </motion.div>
+        </div>
         
         <h2 className="text-4xl md:text-5xl font-bold mb-6">
           <span className="bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
@@ -100,73 +50,47 @@ const TestimonialsSection: React.FC = React.memo(() => {
         <p className="text-xl text-gray-300 max-w-4xl mx-auto leading-relaxed">
           Real stories from people whose lives have been transformed by our predictive healthcare technology
         </p>
-      </motion.div>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
         {testimonials.map((testimonial, index) => (
-          <AnimatedCard key={index} delay={index}>
-            <motion.div
-              className="bg-gray-800/80 backdrop-blur-sm rounded-3xl p-8 border border-gray-700/30 shadow-xl h-full"
-              whileHover={{ scale: 1.02 }}
-              transition={{ duration: 0.3 }}
-            >
-              {/* Rating Stars */}
-              <div className="flex items-center mb-6">
-                {[...Array(testimonial.rating)].map((_, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, scale: 0 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: index * 0.1 + i * 0.05 }}
-                  >
-                    <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                  </motion.div>
-                ))}
+          <div
+            key={index}
+            className="bg-gray-800/80 backdrop-blur-sm rounded-3xl p-8 border border-gray-700/30 shadow-xl h-full hover:scale-102 transition-transform duration-300"
+          >
+            {/* Rating Stars */}
+            <div className="flex items-center mb-6">
+              {[...Array(testimonial.rating)].map((_, i) => (
+                <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
+              ))}
+            </div>
+            
+            {/* Testimonial Text */}
+            <blockquote className="text-gray-300 text-lg leading-relaxed mb-8">
+              "{testimonial.testimonial}"
+            </blockquote>
+            
+            {/* Author Info */}
+            <div className="flex items-center">
+              <div
+                className={`w-12 h-12 rounded-full bg-gradient-to-br ${testimonial.color} flex items-center justify-center text-white font-bold text-lg mr-4 hover:scale-110 transition-transform duration-200`}
+              >
+                {testimonial.name.charAt(0)}
               </div>
-              
-              {/* Testimonial Text */}
-              <motion.blockquote
-                className="text-gray-300 text-lg leading-relaxed mb-8"
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.2 + 0.3 }}
-              >
-                "{testimonial.testimonial}"
-              </motion.blockquote>
-              
-              {/* Author Info */}
-              <motion.div
-                className="flex items-center"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.2 + 0.5 }}
-              >
-                <motion.div
-                  className={`w-12 h-12 rounded-full bg-gradient-to-br ${testimonial.color} flex items-center justify-center text-white font-bold text-lg mr-4`}
-                  whileHover={{ scale: 1.1 }}
-                >
-                  {testimonial.name.charAt(0)}
-                </motion.div>
-                <div>
-                  <h4 className="text-white font-semibold text-lg">
-                    {testimonial.name}
-                  </h4>
-                  <p className="text-gray-400 text-sm">
-                    {testimonial.role}
-                  </p>
-                </div>
-              </motion.div>
-            </motion.div>
-          </AnimatedCard>
+              <div>
+                <h4 className="text-white font-semibold text-lg">
+                  {testimonial.name}
+                </h4>
+                <p className="text-gray-400 text-sm">
+                  {testimonial.role}
+                </p>
+              </div>
+            </div>
+          </div>
         ))}
       </div>
     </section>
   );
-});
-
-TestimonialsSection.displayName = 'TestimonialsSection';
+};
 
 export default TestimonialsSection;
