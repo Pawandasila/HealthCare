@@ -27,7 +27,7 @@ const MedTechLanding = React.memo(() => {
       <StatsSection />
       <FeaturesSection />
       <HowItWorksSection />
-      <TestimonialsSection />
+      {/* <TestimonialsSection /> */}
       <CTASection />
       <Footer />
       <ScrollToTop />

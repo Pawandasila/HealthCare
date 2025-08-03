@@ -48,7 +48,7 @@ const Navigation = React.memo<NavigationProps>(({ mobileMenuOpen, setMobileMenuO
           <HeartPulse className="h-6 w-6 text-white" />
         </motion.div>
         <span className="font-bold text-2xl bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-          MedPredict
+          HealthCare
         </span>
       </motion.div>
       
