@@ -45,10 +45,7 @@ const HeroSection = () => {
       </div>
 
       <div className="lg:w-1/2 relative">
-        {/* Static background decoration elements */}
-        <div className="absolute -top-8 -left-8 w-80 h-80 bg-gradient-to-br from-blue-600/30 to-purple-600/30 rounded-full mix-blend-multiply filter blur-2xl" />
-        <div className="absolute -bottom-8 -right-8 w-80 h-80 bg-gradient-to-br from-indigo-600/30 to-pink-600/30 rounded-full mix-blend-multiply filter blur-2xl" />
-
+       
         {/* Dashboard image */}
         <div className="relative z-10">
           <div className="rounded-3xl shadow-2xl overflow-hidden bg-gradient-to-br from-gray-800 to-gray-900 p-2 hover:shadow-4xl transition-shadow duration-300">
