@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   Card,
   CardHeader,
@@ -10,192 +10,31 @@ import {
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
-  Calendar,
-  Pill,
-  FileText,
   MessageSquare,
+  Heart,
+  Activity,
+  User,
 } from "lucide-react";
 
 import LabResultsTimeline from "@/components/custom/LabResult";
-import HealthcareMessaging from "@/components/custom/Message";
 import QuickAction from "@/components/custom/QuickAction";
-import AppointmentsSection from "@/components/custom/Appointment";
 import useAxios from "../hooks/UseAxios";
 import GetHealthInfoPage from "@/components/custom/PatientHealthModel";
 import SOSButton from "@/components/custom/SOS";
 
-// Type definitions
-interface Appointment {
-  id: string;
-  doctorName: string;
-  specialty: string;
-  date: string;
-  time: string;
-  location: string;
-  status: string;
-}
-
-interface PastAppointment extends Appointment {
-  diagnosis: string;
-  treatment: string;
-  followUp: string;
-  hasReport: boolean;
-  reportId?: string;
-}
-
-interface Medication {
-  id: string;
-  name: string;
-  dosage: string;
-  frequency: string;
-  refillBy: string;
-  refillsLeft: number;
-  prescribedBy: string;
-  startDate: string;
-}
-
-interface LabResult {
-  id: string;
-  testName: string;
-  date: string;
-  status: string;
-  result?: string;
-  hasReport?: boolean;
-  reportId?: string;
-}
-
-interface Message {
-  id: string;
-  from: string;
-  title: string;
-  preview: string;
-  date: string;
-  isRead: boolean;
-}
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.4 },
-  },
-};
 
 export default function PatientDashboard() {
-  const patientInfo = {
-    name: "John Smith",
-    age: 45,
-    dob: "1980-04-15",
-    primaryDoctor: "Dr. James Wilson",
-    nextAppointment: "March 15, 2025",
-    lastVisit: "February 28, 2025",
-    insuranceProvider: "HealthPlus",
-    insuranceId: "HP-2345678",
-    allergies: ["Penicillin", "Shellfish"],
-  };
 
-  const [medications, setMedications] = useState<Medication[]>([
-    {
-      id: "1",
-      name: "Lisinopril",
-      dosage: "10mg",
-      frequency: "Once daily",
-      refillBy: "2025-04-20",
-      refillsLeft: 2,
-      prescribedBy: "Dr. James Wilson",
-      startDate: "2025-02-28",
-    },
-    {
-      id: "2",
-      name: "Atorvastatin",
-      dosage: "20mg",
-      frequency: "Once daily at bedtime",
-      refillBy: "2025-03-30",
-      refillsLeft: 1,
-      prescribedBy: "Dr. James Wilson",
-      startDate: "2024-11-15",
-    },
-    {
-      id: "3",
-      name: "Metformin",
-      dosage: "500mg",
-      frequency: "Twice daily with meals",
-      refillBy: "2025-05-15",
-      refillsLeft: 3,
-      prescribedBy: "Dr. Sarah Johnson",
-      startDate: "2024-10-10",
-    },
-  ]);
   const [userInfo, setUserInfo] = useState<any>(null);
   const api = useAxios();
   const getUserInfo = async () => {
     const res = await api.get("/userInfo/");
     if (res.status == 200) {
+      console.log(res.data)
       setUserInfo(res.data);
     }
   };
 
-  const [labResults, setLabResults] = useState<LabResult[]>([
-    {
-      id: "1",
-      testName: "Comprehensive Metabolic Panel",
-      date: "2025-02-28",
-      status: "Completed",
-      result: "Normal",
-      hasReport: true,
-      reportId: "LAB-7823",
-    },
-    {
-      id: "2",
-      testName: "Lipid Panel",
-      date: "2025-02-28",
-      status: "Completed",
-      result: "Slightly Elevated",
-      hasReport: true,
-      reportId: "LAB-7824",
-    },
-    {
-      id: "3",
-      testName: "HbA1c",
-      date: "2025-03-05",
-      status: "Processing",
-    },
-    {
-      id: "4",
-      testName: "Thyroid Function",
-      date: "2025-03-05",
-      status: "Pending",
-    },
-  ]);
-
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      from: "Dr. James Wilson",
-      title: "Follow-up from your last visit",
-      preview:
-        "I've reviewed your latest lab results and would like to discuss...",
-      date: "2025-03-01",
-      isRead: true,
-    },
-    {
-      id: "2",
-      from: "Medical Records",
-      title: "Your Lab Results Are Available",
-      preview: "Your recent lab tests have been completed. You can now...",
-      date: "2025-03-04",
-      isRead: false,
-    },
-    {
-      id: "3",
-      from: "Pharmacy",
-      title: "Prescription Ready for Pickup",
-      preview: "Your prescription for Lisinopril is ready for pickup at...",
-      date: "2025-03-05",
-      isRead: false,
-    },
-  ]);
 
   const cardVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -287,7 +126,6 @@ export default function PatientDashboard() {
               </div>
             </motion.div>
 
-            {/* Summary Cards */}
             <motion.div
               variants={containerVariants}
               initial="hidden"
@@ -295,7 +133,7 @@ export default function PatientDashboard() {
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
             >
               <motion.div
-                key="next-appointment"
+                key="health-info"
                 variants={cardVariants}
                 whileHover="hover"
                 className="group"
@@ -315,20 +153,20 @@ export default function PatientDashboard() {
                             ease: "easeInOut"
                           }}
                         >
-                          <Calendar className="w-6 h-6 text-primary" />
+                          <Heart className="w-6 h-6 text-primary" />
                         </motion.div>
                         <CardTitle className="text-lg text-card-foreground font-semibold">
-                          Next Appointment
+                          Blood Group
                         </CardTitle>
                       </div>
                     </div>
                   </CardHeader>
                   <CardContent className="relative z-10">
                     <p className="text-2xl font-bold text-card-foreground mb-2 tracking-tight">
-                      {patientInfo.nextAppointment}
+                      {userInfo?.blood_group?.toUpperCase() || "N/A"}
                     </p>
                     <p className="text-sm text-muted-foreground font-medium">
-                      With {patientInfo.primaryDoctor}
+                      {userInfo?.gender?.charAt(0).toUpperCase() + userInfo?.gender?.slice(1) || "Not specified"}
                     </p>
                   </CardContent>
                 </Card>
@@ -359,34 +197,30 @@ export default function PatientDashboard() {
                             repeatDelay: 2
                           }}
                         >
-                          <Pill className="w-6 h-6 text-primary" />
+                          <User className="w-6 h-6 text-primary" />
                         </motion.div>
                         <CardTitle className="text-lg text-card-foreground font-semibold">
-                          Medications
+                          Height & Weight
                         </CardTitle>
                       </div>
                     </div>
                   </CardHeader>
                   <CardContent className="relative z-10">
-                    <p className="text-2xl font-bold text-card-foreground mb-2 tracking-tight">{medications.length}</p>
-                    <p className="text-sm text-destructive font-medium">
-                      {medications.filter((med) => med.refillsLeft <= 1).length}{" "}
-                      need refill soon
+                    <p className="text-2xl font-bold text-card-foreground mb-2 tracking-tight">
+                      {userInfo?.height || "N/A"}cm
+                    </p>
+                    <p className="text-sm text-muted-foreground font-medium">
+                      Weight: {userInfo?.weight || "N/A"}kg
                     </p>
                   </CardContent>
                 </Card>
               </motion.div>
 
               <motion.div
-                key="lab-results"
+                key="health-conditions"
                 variants={cardVariants}
                 whileHover="hover"
-                className="group cursor-pointer"
-                onClick={() =>
-                  document
-                    .getElementById("timeline")
-                    ?.scrollIntoView({ behavior: "smooth" })
-                }
+                className="group"
               >
                 <Card className="border-border bg-card backdrop-blur-xl hover:bg-card/80 transition-all duration-500 overflow-hidden relative shadow-2xl hover:shadow-primary/20">
                   <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary/60 via-primary/70 to-primary/80 shadow-lg"></div>
@@ -407,43 +241,30 @@ export default function PatientDashboard() {
                             repeatDelay: 2
                           }}
                         >
-                          <FileText className="w-6 h-6 text-primary" />
+                          <Activity className="w-6 h-6 text-primary" />
                         </motion.div>
                         <CardTitle className="text-lg text-card-foreground font-semibold">
-                          Lab Results
+                          Health Condition
                         </CardTitle>
                       </div>
                     </div>
                   </CardHeader>
                   <CardContent className="relative z-10">
-                    <p className="text-2xl font-bold text-card-foreground mb-2 tracking-tight">
-                      {
-                        labResults.filter((lab) => lab.status === "Completed")
-                          .length
-                      }{" "}
-                      Complete
+                    <p className="text-xl font-bold text-card-foreground mb-2 tracking-tight">
+                      {userInfo?.disease || "None recorded"}
                     </p>
                     <p className="text-sm text-muted-foreground font-medium">
-                      {
-                        labResults.filter((lab) => lab.status !== "Completed")
-                          .length
-                      }{" "}
-                      pending
+                      Current condition
                     </p>
                   </CardContent>
                 </Card>
               </motion.div>
 
               <motion.div
-                key="messages"
+                key="allergies"
                 variants={cardVariants}
                 whileHover="hover"
-                className="group cursor-pointer"
-                onClick={() =>
-                  document
-                    .getElementById("message")
-                    ?.scrollIntoView({ behavior: "smooth" })
-                }
+                className="group"
               >
                 <Card className="border-border bg-card backdrop-blur-xl hover:bg-card/80 transition-all duration-500 overflow-hidden relative shadow-2xl hover:shadow-destructive/20">
                   <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-destructive/60 via-destructive/70 to-destructive/80 shadow-lg"></div>
@@ -467,10 +288,10 @@ export default function PatientDashboard() {
                           <MessageSquare className="w-6 h-6 text-destructive" />
                         </motion.div>
                         <CardTitle className="text-lg text-card-foreground font-semibold">
-                          Messages
+                          Allergies
                         </CardTitle>
                       </div>
-                      {messages.filter((msg) => !msg.isRead).length > 0 && (
+                      {userInfo?.allergies && userInfo.allergies !== "No" && (
                         <motion.div
                           className="w-4 h-4 bg-destructive rounded-full shadow-lg ring-2 ring-destructive/40"
                           animate={{ 
@@ -487,28 +308,31 @@ export default function PatientDashboard() {
                     </div>
                   </CardHeader>
                   <CardContent className="relative z-10">
-                    <p className="text-2xl font-bold text-card-foreground mb-2 tracking-tight">{messages.length}</p>
+                    <p className="text-2xl font-bold text-card-foreground mb-2 tracking-tight">
+                      {userInfo?.allergies || "None"}
+                    </p>
                     <motion.p
-                      className="text-sm text-destructive font-medium"
+                      className="text-sm text-muted-foreground font-medium"
                       animate={{
-                        scale:
-                          messages.filter((msg) => !msg.isRead).length > 0
-                            ? [1, 1.02, 1]
-                            : 1,
+                        scale: userInfo?.allergies && userInfo.allergies !== "No" ? [1, 1.02, 1] : 1,
                       }}
                       transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                     >
-                      {messages.filter((msg) => !msg.isRead).length} unread
+                      {userInfo?.allergies && userInfo.allergies !== "No" ? "Active allergy" : "No known allergies"}
                     </motion.p>
                   </CardContent>
                 </Card>
               </motion.div>
             </motion.div>
 
-            <AppointmentsSection />
+            {/* Appointments Section - Removed as requested */}
+            {/* <AppointmentsSection /> */}
+            
+            {/* Enhanced Lab Results Timeline */}
+            <LabResultsTimeline />
 
             {/* Lab Results Section */}
-            <motion.div
+            {/* <motion.div
               className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8"
               variants={containerVariants}
               initial="hidden"
@@ -522,11 +346,10 @@ export default function PatientDashboard() {
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/60 via-primary/70 to-primary/80"></div>
                 <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary/8 to-transparent rounded-full -translate-y-16 translate-x-16"></div>
                 <div className="h-full max-h-[570px] overflow-auto" id="timeline">
-                  <LabResultsTimeline />
                 </div>
               </motion.div>
 
-              {/* Messaging Section */}
+              
               <motion.div
                 className="bg-card/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-border overflow-hidden relative"
                 variants={itemVariants}
@@ -537,10 +360,10 @@ export default function PatientDashboard() {
                   <HealthcareMessaging />
                 </div>
               </motion.div>
-            </motion.div>
+            </motion.div> */}
 
             {/* Quick Actions */}
-            <QuickAction />
+            {/* <QuickAction /> */}
             <SOSButton/>
           </>
         ):<></>}

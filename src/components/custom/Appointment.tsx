@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Calendar, FileDown } from "lucide-react";
+import { Plus, Calendar, FileDown, Clock, MapPin, User, Stethoscope, Activity } from "lucide-react";
 
 import { Card } from "@/components/ui/card";
 import { CardHeader } from "@/components/ui/card";
@@ -8,14 +8,6 @@ import { CardTitle } from "@/components/ui/card";
 import { CardDescription } from "@/components/ui/card";
 import { CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import {
-  Table,
-  TableHeader,
-  TableRow,
-  TableHead,
-  TableBody,
-  TableCell,
-} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -94,7 +86,6 @@ const appointmentFormSchema = z.object({
 type AppointmentFormValues = z.infer<typeof appointmentFormSchema>;
 
 const MotionButton = motion(Button);
-const MotionTableRow = motion(TableRow);
 
 const AppointmentsSection: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -186,19 +177,22 @@ const AppointmentsSection: React.FC = () => {
 
   return (
     <motion.div
-      className="grid grid-cols-1 gap-6 mb-6"
+      className="mb-8"
       initial="hidden"
       animate="visible"
       variants={fadeInUp}
       transition={{ delay: 0.3 }}
     >
-      <Card className="border-border bg-card/95 backdrop-blur-xl shadow-2xl overflow-hidden relative">
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/60 via-primary/70 to-primary/80"></div>
-        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary/8 to-transparent rounded-full -translate-y-16 translate-x-16"></div>
-        <CardHeader className="flex flex-row items-center justify-between relative z-10">
+      <Card className="border-border bg-card/95 backdrop-blur-xl shadow-2xl overflow-hidden relative rounded-3xl">
+        <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary/60 via-primary/70 to-primary/80 shadow-lg"></div>
+        <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-primary/8 to-transparent rounded-full -translate-y-20 translate-x-20"></div>
+        <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-primary/5 to-transparent rounded-full translate-y-16 -translate-x-16"></div>
+        <CardHeader className="flex flex-row items-center justify-between relative z-10 p-8">
           <div>
-            <CardTitle className="text-xl font-bold text-card-foreground">Appointments</CardTitle>
-            <CardDescription className="text-muted-foreground">
+            <CardTitle className="text-3xl font-bold heading-maya bg-gradient-to-r from-foreground via-foreground to-foreground bg-clip-text text-transparent mb-2">
+              Appointments
+            </CardTitle>
+            <CardDescription className="text-muted-foreground text-lg">
               View your upcoming and past appointments
             </CardDescription>
           </div>
@@ -206,145 +200,256 @@ const AppointmentsSection: React.FC = () => {
             onClick={() => setIsModalOpen(true)}
             whileHover={buttonVariants.hover}
             whileTap={buttonVariants.tap}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground border-0 shadow-lg hover:shadow-primary/25"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground border-0 shadow-lg hover:shadow-primary/25 px-6 py-3 rounded-xl font-semibold"
           >
-            <Plus className="w-4 h-4 mr-2" />
+            <Plus className="w-5 h-5 mr-2" />
             Add Appointment
           </MotionButton>
         </CardHeader>
-        <CardContent className="relative z-10">
-          <Tabs defaultValue="upcoming">
-            <TabsList className="mb-4 bg-muted p-1 rounded-lg border border-border">
+        <CardContent className="relative z-10 p-8">
+          <Tabs defaultValue="upcoming" className="w-full">
+            <TabsList className="mb-6 bg-card/80 backdrop-blur-xl p-2 rounded-2xl border border-border shadow-lg w-full md:w-auto">
               <TabsTrigger
                 value="upcoming"
-                className="rounded-md text-muted-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg"
+                className="rounded-xl text-muted-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg px-6 py-3 font-semibold transition-all duration-300"
               >
-                Upcoming
+                Upcoming Appointments
               </TabsTrigger>
               <TabsTrigger
                 value="past"
-                className="rounded-md text-muted-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg"
+                className="rounded-xl text-muted-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg px-6 py-3 font-semibold transition-all duration-300"
               >
                 Past Visits
               </TabsTrigger>
-            </TabsList>            <AnimatePresence mode="wait">
-              <TabsContent value="upcoming">
-                <div className="overflow-x-auto rounded-lg border border-border bg-muted/50">
-                  <Table>
-                    <TableHeader className="bg-secondary">
-                      <TableRow className="border-b border-border">
-                        <TableHead className="font-semibold text-secondary-foreground">Doctor</TableHead>
-                        <TableHead className="font-semibold text-secondary-foreground">
-                          Specialty
-                        </TableHead>
-                        <TableHead className="font-semibold text-secondary-foreground">Date</TableHead>
-                        <TableHead className="font-semibold text-secondary-foreground">Time</TableHead>
-                        <TableHead className="font-semibold text-secondary-foreground">
-                          Location
-                        </TableHead>
-                        <TableHead className="font-semibold text-secondary-foreground">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {upcomingAppointments.map((appointment, i) => (
-                        <MotionTableRow
-                          key={appointment.id || i}
-                          custom={i}
-                          initial="hidden"
-                          animate="visible"
-                          whileHover="hover"
-                          variants={rowVariants}
-                          className="cursor-pointer border-b border-border hover:bg-muted/50 transition-colors"
+            </TabsList>
+
+            <AnimatePresence mode="wait">
+              <TabsContent value="upcoming" className="mt-6">
+                <div className="relative">
+                  {/* Timeline Line */}
+                  <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary/60 via-primary/40 to-primary/20"></div>
+                  
+                  <div className="space-y-6">
+                    {upcomingAppointments.map((appointment, i) => (
+                      <motion.div
+                        key={appointment.id || i}
+                        custom={i}
+                        initial="hidden"
+                        animate="visible"
+                        variants={rowVariants}
+                        className="relative flex items-start gap-6"
+                      >
+                        {/* Timeline Dot */}
+                        <div className="relative z-10 flex-shrink-0">
+                          <motion.div
+                            className="w-4 h-4 bg-primary rounded-full border-4 border-card shadow-lg"
+                            animate={{ 
+                              scale: [1, 1.2, 1],
+                              boxShadow: [
+                                "0 0 0 0 rgba(var(--primary), 0.4)",
+                                "0 0 0 10px rgba(var(--primary), 0)",
+                                "0 0 0 0 rgba(var(--primary), 0)"
+                              ]
+                            }}
+                            transition={{ 
+                              duration: 2, 
+                              repeat: Infinity, 
+                              delay: i * 0.5 
+                            }}
+                          />
+                        </div>
+
+                        {/* Appointment Card */}
+                        <motion.div
+                          className="flex-1"
+                          whileHover={{ y: -4, scale: 1.02 }}
+                          transition={{ duration: 0.3 }}
                         >
-                          <TableCell className="font-medium text-card-foreground">
-                            {appointment.doctorName}
-                          </TableCell>
-                          <TableCell className="text-muted-foreground">{appointment.specialty}</TableCell>
-                          <TableCell className="text-muted-foreground">{appointment.date}</TableCell>
-                          <TableCell className="text-muted-foreground">{appointment.time}</TableCell>
-                          <TableCell className="text-muted-foreground">{appointment.location}</TableCell>
-                          <TableCell>
-                            <MotionButton
-                              variant="outline"
-                              size="sm"
-                              whileHover={buttonVariants.hover}
-                              whileTap={buttonVariants.tap}
-                              className="text-primary border-primary/50 hover:bg-primary/20 hover:border-primary transition-all"
-                            >
-                              <Calendar className="w-4 h-4 mr-2" />
-                              Reschedule
-                            </MotionButton>
-                          </TableCell>
-                        </MotionTableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                          <Card className="border-border bg-card/80 backdrop-blur-xl shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl overflow-hidden">
+                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/60 via-primary/80 to-primary/60"></div>
+                            <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-primary/10 to-transparent rounded-full -translate-y-10 translate-x-10"></div>
+                            
+                            <CardContent className="p-6 relative z-10">
+                              <div className="flex items-start justify-between mb-4">
+                                <div className="flex items-center gap-3">
+                                  <motion.div
+                                    className="p-2 bg-primary/20 rounded-xl"
+                                    animate={{ rotate: [0, 5, -5, 0] }}
+                                    transition={{ duration: 4, repeat: Infinity, delay: i * 0.2 }}
+                                  >
+                                    <User className="w-5 h-5 text-primary" />
+                                  </motion.div>
+                                  <div>
+                                    <h3 className="text-xl font-bold text-card-foreground mb-1">
+                                      {appointment.doctorName}
+                                    </h3>
+                                    <div className="flex items-center gap-2 text-muted-foreground">
+                                      <Stethoscope className="w-4 h-4" />
+                                      <span className="font-medium">{appointment.specialty}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                                <MotionButton
+                                  variant="outline"
+                                  size="sm"
+                                  whileHover={buttonVariants.hover}
+                                  whileTap={buttonVariants.tap}
+                                  className="text-primary border-primary/50 hover:bg-primary/20 hover:border-primary transition-all rounded-lg font-semibold"
+                                >
+                                  <Calendar className="w-4 h-4 mr-2" />
+                                  Reschedule
+                                </MotionButton>
+                              </div>
+
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div className="flex items-center gap-3 p-3 bg-card/50 rounded-xl border border-border/50">
+                                  <div className="p-2 bg-primary/10 rounded-lg">
+                                    <Calendar className="w-4 h-4 text-primary" />
+                                  </div>
+                                  <div>
+                                    <p className="text-xs text-muted-foreground font-medium">Date</p>
+                                    <p className="text-sm font-semibold text-card-foreground">{appointment.date}</p>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center gap-3 p-3 bg-card/50 rounded-xl border border-border/50">
+                                  <div className="p-2 bg-primary/10 rounded-lg">
+                                    <Clock className="w-4 h-4 text-primary" />
+                                  </div>
+                                  <div>
+                                    <p className="text-xs text-muted-foreground font-medium">Time</p>
+                                    <p className="text-sm font-semibold text-card-foreground">{appointment.time}</p>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center gap-3 p-3 bg-card/50 rounded-xl border border-border/50">
+                                  <div className="p-2 bg-primary/10 rounded-lg">
+                                    <MapPin className="w-4 h-4 text-primary" />
+                                  </div>
+                                  <div>
+                                    <p className="text-xs text-muted-foreground font-medium">Location</p>
+                                    <p className="text-sm font-semibold text-card-foreground">{appointment.location}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </motion.div>
+                      </motion.div>
+                    ))}
+                  </div>
                 </div>
               </TabsContent>
 
-              <TabsContent value="past">
-                <div className="overflow-x-auto rounded-lg border border-slate-700/50 dark:border-slate-600/50 bg-slate-900/50 dark:bg-slate-800/50">
-                  <Table>
-                    <TableHeader className="bg-slate-800/70 dark:bg-slate-700/70">
-                      <TableRow className="border-b border-slate-700/50 dark:border-slate-600/50">
-                        <TableHead className="font-semibold text-slate-200 dark:text-slate-300">Date</TableHead>
-                        <TableHead className="font-semibold text-slate-200 dark:text-slate-300">Doctor</TableHead>
-                        <TableHead className="font-semibold text-slate-200 dark:text-slate-300">
-                          Specialty
-                        </TableHead>
-                        <TableHead className="font-semibold text-slate-200 dark:text-slate-300">
-                          Diagnosis
-                        </TableHead>
-                        <TableHead className="font-semibold text-slate-200 dark:text-slate-300">Report</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {pastAppointments.map((appointment, i) => (
-                        <MotionTableRow
-                          key={appointment.id || i}
-                          custom={i}
-                          initial="hidden"
-                          animate="visible"
-                          whileHover="hover"
-                          variants={rowVariants}
-                          className="cursor-pointer border-b border-slate-700/30 dark:border-slate-600/30 hover:bg-slate-800/50 dark:hover:bg-slate-700/50 transition-colors"
+              <TabsContent value="past" className="mt-6">
+                <div className="relative">
+                  {/* Timeline Line */}
+                  <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-muted-foreground/40 via-muted-foreground/30 to-muted-foreground/20"></div>
+                  
+                  <div className="space-y-6">
+                    {pastAppointments.map((appointment, i) => (
+                      <motion.div
+                        key={appointment.id || i}
+                        custom={i}
+                        initial="hidden"
+                        animate="visible"
+                        variants={rowVariants}
+                        className="relative flex items-start gap-6"
+                      >
+                        {/* Timeline Dot */}
+                        <div className="relative z-10 flex-shrink-0">
+                          <div className="w-4 h-4 bg-muted-foreground/60 rounded-full border-4 border-card shadow-lg" />
+                        </div>
+
+                        {/* Past Appointment Card */}
+                        <motion.div
+                          className="flex-1"
+                          whileHover={{ y: -4, scale: 1.02 }}
+                          transition={{ duration: 0.3 }}
                         >
-                          <TableCell className="font-medium text-white dark:text-slate-100">
-                            {appointment.date}
-                          </TableCell>
-                          <TableCell className="text-slate-300 dark:text-slate-400">{appointment.doctorName}</TableCell>
-                          <TableCell className="text-slate-300 dark:text-slate-400">{appointment.specialty}</TableCell>
-                          <TableCell className="text-slate-300 dark:text-slate-400">{appointment.diagnosis}</TableCell>
-                          <TableCell>
-                            {appointment.hasReport && appointment.reportId && (
-                              <MotionButton
-                                variant="ghost"
-                                size="sm"
-                                onClick={() =>
-                                  handleDownloadReport(appointment.reportId!)
-                                }
-                                whileHover={buttonVariants.hover}
-                                whileTap={buttonVariants.tap}
-                                className="text-emerald-400 hover:bg-emerald-500/20 transition-all"
-                              >
-                                <motion.div
-                                  animate={{ y: [0, -3, 0] }}
-                                  transition={{
-                                    duration: 1.5,
-                                    repeat: Infinity,
-                                    repeatDelay: 2,
-                                  }}
-                                >
-                                  <FileDown className="w-4 h-4 mr-2" />
-                                </motion.div>
-                                Download
-                              </MotionButton>
-                            )}
-                          </TableCell>
-                        </MotionTableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                          <Card className="border-border bg-card/80 backdrop-blur-xl shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl overflow-hidden">
+                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-muted-foreground/40 via-muted-foreground/60 to-muted-foreground/40"></div>
+                            <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-muted-foreground/8 to-transparent rounded-full -translate-y-10 translate-x-10"></div>
+                            
+                            <CardContent className="p-6 relative z-10">
+                              <div className="flex items-start justify-between mb-4">
+                                <div className="flex items-center gap-3">
+                                  <div className="p-2 bg-muted-foreground/20 rounded-xl">
+                                    <User className="w-5 h-5 text-muted-foreground" />
+                                  </div>
+                                  <div>
+                                    <h3 className="text-xl font-bold text-card-foreground mb-1">
+                                      {appointment.doctorName}
+                                    </h3>
+                                    <div className="flex items-center gap-2 text-muted-foreground">
+                                      <Stethoscope className="w-4 h-4" />
+                                      <span className="font-medium">{appointment.specialty}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                                {appointment.hasReport && appointment.reportId && (
+                                  <MotionButton
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleDownloadReport(appointment.reportId!)}
+                                    whileHover={buttonVariants.hover}
+                                    whileTap={buttonVariants.tap}
+                                    className="text-primary hover:bg-primary/20 transition-all rounded-lg font-semibold"
+                                  >
+                                    <motion.div
+                                      animate={{ y: [0, -3, 0] }}
+                                      transition={{
+                                        duration: 1.5,
+                                        repeat: Infinity,
+                                        repeatDelay: 2,
+                                      }}
+                                    >
+                                      <FileDown className="w-4 h-4 mr-2" />
+                                    </motion.div>
+                                    Download Report
+                                  </MotionButton>
+                                )}
+                              </div>
+
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div className="flex items-center gap-3 p-3 bg-card/50 rounded-xl border border-border/50">
+                                  <div className="p-2 bg-muted-foreground/10 rounded-lg">
+                                    <Calendar className="w-4 h-4 text-muted-foreground" />
+                                  </div>
+                                  <div>
+                                    <p className="text-xs text-muted-foreground font-medium">Visit Date</p>
+                                    <p className="text-sm font-semibold text-card-foreground">{appointment.date}</p>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center gap-3 p-3 bg-card/50 rounded-xl border border-border/50">
+                                  <div className="p-2 bg-muted-foreground/10 rounded-lg">
+                                    <Activity className="w-4 h-4 text-muted-foreground" />
+                                  </div>
+                                  <div>
+                                    <p className="text-xs text-muted-foreground font-medium">Diagnosis</p>
+                                    <p className="text-sm font-semibold text-card-foreground">{appointment.diagnosis}</p>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center gap-3 p-3 bg-card/50 rounded-xl border border-border/50">
+                                  <div className="p-2 bg-muted-foreground/10 rounded-lg">
+                                    <FileDown className="w-4 h-4 text-muted-foreground" />
+                                  </div>
+                                  <div>
+                                    <p className="text-xs text-muted-foreground font-medium">Report</p>
+                                    <p className="text-sm font-semibold text-card-foreground">
+                                      {appointment.hasReport ? 'Available' : 'Not Available'}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </motion.div>
+                      </motion.div>
+                    ))}
+                  </div>
                 </div>
               </TabsContent>
             </AnimatePresence>
@@ -354,29 +459,30 @@ const AppointmentsSection: React.FC = () => {
 
       {/* Add Appointment Modal */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-bold">
+        <DialogContent className="sm:max-w-md bg-card/95 backdrop-blur-xl border border-border rounded-2xl shadow-2xl">
+          <DialogHeader className="relative">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/60 via-primary/70 to-primary/80 rounded-t-2xl"></div>
+            <DialogTitle className="text-2xl font-bold heading-maya bg-gradient-to-r from-foreground via-foreground to-foreground bg-clip-text text-transparent mt-4">
               Schedule New Appointment
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-muted-foreground text-base">
               Fill in the details below to schedule your appointment.
             </DialogDescription>
           </DialogHeader>
 
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 mt-6">
               <FormField
                 control={form.control}
                 name="doctorName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Doctor Name</FormLabel>
+                    <FormLabel className="text-card-foreground font-semibold">Doctor Name</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Dr. John Smith"
                         {...field}
-                        className="focus:ring-blue-500"
+                        className="focus:ring-primary focus:border-primary rounded-xl bg-card/50 backdrop-blur-xl border-border"
                       />
                     </FormControl>
                     <FormMessage />
@@ -389,19 +495,19 @@ const AppointmentsSection: React.FC = () => {
                 name="specialty"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Specialty</FormLabel>
+                    <FormLabel className="text-card-foreground font-semibold">Specialty</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="rounded-xl bg-card/50 backdrop-blur-xl border-border">
                           <SelectValue placeholder="Select a specialty" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                      <SelectContent className="bg-card/95 backdrop-blur-xl border border-border rounded-xl">
                         {specialties.map((specialty) => (
-                          <SelectItem key={specialty} value={specialty}>
+                          <SelectItem key={specialty} value={specialty} className="hover:bg-primary/10">
                             {specialty}
                           </SelectItem>
                         ))}
@@ -418,12 +524,12 @@ const AppointmentsSection: React.FC = () => {
                   name="date"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Date</FormLabel>
+                      <FormLabel className="text-card-foreground font-semibold">Date</FormLabel>
                       <FormControl>
                         <Input
                           type="date"
                           {...field}
-                          className="focus:ring-blue-500"
+                          className="focus:ring-primary focus:border-primary rounded-xl bg-card/50 backdrop-blur-xl border-border"
                         />
                       </FormControl>
                       <FormMessage />
@@ -436,12 +542,12 @@ const AppointmentsSection: React.FC = () => {
                   name="time"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Time</FormLabel>
+                      <FormLabel className="text-card-foreground font-semibold">Time</FormLabel>
                       <FormControl>
                         <Input
                           type="time"
                           {...field}
-                          className="focus:ring-blue-500"
+                          className="focus:ring-primary focus:border-primary rounded-xl bg-card/50 backdrop-blur-xl border-border"
                         />
                       </FormControl>
                       <FormMessage />
@@ -455,12 +561,12 @@ const AppointmentsSection: React.FC = () => {
                 name="location"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Location</FormLabel>
+                    <FormLabel className="text-card-foreground font-semibold">Location</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Main Hospital, Room 302"
                         {...field}
-                        className="focus:ring-blue-500"
+                        className="focus:ring-primary focus:border-primary rounded-xl bg-card/50 backdrop-blur-xl border-border"
                       />
                     </FormControl>
                     <FormMessage />
@@ -468,15 +574,19 @@ const AppointmentsSection: React.FC = () => {
                 )}
               />
 
-              <DialogFooter className="mt-6">
+              <DialogFooter className="mt-8 gap-3">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => setIsModalOpen(false)}
+                  className="rounded-xl border-border hover:bg-card/50 backdrop-blur-xl font-semibold"
                 >
                   Cancel
                 </Button>
-                <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+                <Button 
+                  type="submit" 
+                  className="bg-primary hover:bg-primary/90 rounded-xl font-semibold shadow-lg hover:shadow-primary/25"
+                >
                   Schedule Appointment
                 </Button>
               </DialogFooter>

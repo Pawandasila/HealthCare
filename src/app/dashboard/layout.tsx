@@ -178,39 +178,26 @@ export default function DashboardLayout({
               <DropdownMenuTrigger asChild>
                 <button className="p-2 rounded-xl hover:bg-muted/50 relative transition-colors">
                   <Bell size={20} className="text-foreground" />
-                  <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-72 bg-card border-border/50">
                 <DropdownMenuLabel className="text-foreground">Notifications</DropdownMenuLabel>
                 <DropdownMenuSeparator className="bg-border/50" />
-                <DropdownMenuItem className="cursor-pointer focus:bg-muted/50">
-                  <div className="flex flex-col">
-                    <span className="font-medium text-foreground">Appointment Reminder</span>
-                    <span className="text-sm text-muted-foreground">
-                      Your next checkup is tomorrow at 2:00 PM
-                    </span>
+                <div className="p-4 text-center">
+                  <div className="flex flex-col items-center justify-center py-6">
+                    <Bell size={32} className="text-muted-foreground mb-2 opacity-50" />
+                    <span className="text-sm text-muted-foreground">No new notifications</span>
                   </div>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer focus:bg-muted/50">
-                  <div className="flex flex-col">
-                    <span className="font-medium text-foreground">New Message</span>
-                    <span className="text-sm text-muted-foreground">
-                      Dr. Smith sent you a message
-                    </span>
-                  </div>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-border/50" />
-                <DropdownMenuItem className="cursor-pointer focus:bg-muted/50">
-                  <span className="text-primary">View all notifications</span>
-                </DropdownMenuItem>
+                </div>
               </DropdownMenuContent>
             </DropdownMenu>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-primary-foreground font-medium cursor-pointer shadow-lg hover:shadow-xl transition-shadow">
-                  {userInfo ? userInfo.first_name[0] + userInfo.last_name[0] : "US"}
+                  {userInfo ? 
+                    (userInfo.first_name?.[0] || "") + (userInfo.last_name?.[0] || "") : 
+                    "?"}
                 </div>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="bg-card border-border/50">
@@ -492,14 +479,18 @@ export default function DashboardLayout({
               <DropdownMenuTrigger asChild>
                 <div className="flex items-center space-x-3 cursor-pointer p-3 rounded-xl hover:bg-primary/10 transition-colors">
                   <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-primary-foreground font-medium shadow-lg">
-                    {userInfo ? userInfo.first_name[0] + userInfo.last_name[0] : "US"}
+                    {userInfo ? 
+                      (userInfo.first_name?.[0] || "") + (userInfo.last_name?.[0] || "") : 
+                      "?"}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-foreground truncate">
-                      {userInfo?.first_name + " " + userInfo?.last_name}
+                      {userInfo ? 
+                        `${userInfo.first_name || ""} ${userInfo.last_name || ""}`.trim() || "Loading..." : 
+                        "Loading..."}
                     </p>
                     <p className="text-xs text-muted-foreground truncate">
-                      {userInfo?.email}
+                      {userInfo?.email || "Loading email..."}
                     </p>
                   </div>
                   <ChevronDown size={16} className="text-muted-foreground" />
