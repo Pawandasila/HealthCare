@@ -47,7 +47,6 @@ const LabResultsTimeline: React.FC = () => {
       setIsLoading(true);
       try {
         const response = await api.get("/timeline");
-        console.log(response);
         if (response.data) {
           setTimelineData(response.data);
         } else {

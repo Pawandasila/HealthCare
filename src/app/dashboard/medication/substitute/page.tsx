@@ -69,7 +69,7 @@ const HealthConsultationChat: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const result = await api.post("/ai/", { message: currentMessage, type: "SubstituteMedicine" });
+      const result = await api.post("/ai/", { message: currentMessage, type: "Substitute Medicine" });
       const responseText = typeof result.data === "object" && result.data.response ? result.data.response : String(result.data);
 
       const aiMessage: Message = {
